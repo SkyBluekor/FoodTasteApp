@@ -152,10 +152,12 @@ public class GamePlayFunc : MonoBehaviour
         stage = new ItemIndex();
         stage.SetIndex(item1index, item2index);
 
-        string LeftFoodImgUrl = Application.dataPath + "/Images/FoodImg/" + FoodAvgScoreData[item1index].Item1 + ".jpg";
-        string RightFoodImgUrl = Application.dataPath + "/Images/FoodImg/" + FoodAvgScoreData[item2index].Item1 + ".jpg";
-        FoodImgGet(LeftFoodImgUrl, "Left", FoodAvgScoreData[item1index].Item3);
-        FoodImgGet(RightFoodImgUrl, "Right", FoodAvgScoreData[item2index].Item3);
+        int leftFoodNumber;
+        int rightFoodNumber;
+        int.TryParse(FoodAvgScoreData[item1index].Item1, out leftFoodNumber);
+        int.TryParse(FoodAvgScoreData[item2index].Item1, out rightFoodNumber);
+        FoodImgGet(leftFoodNumber, "Left", FoodAvgScoreData[item1index].Item3);
+        FoodImgGet(rightFoodNumber, "Right", FoodAvgScoreData[item2index].Item3);
 
         Debug.Log("item1: 이름 " + FoodAvgScoreData[item1index].Item3 + "item1 점수: " + FoodAvgScoreData[item1index].Item2);
         Debug.Log("item1: 이름 " + FoodAvgScoreData[item2index].Item3 + "item1 점수: " + FoodAvgScoreData[item2index].Item2);
@@ -192,47 +194,27 @@ public class GamePlayFunc : MonoBehaviour
         GameOverPanel.SetActive(true);
     }
 
-    private void FoodImgGet(string FoodImgUrl, string Direction, string foodname)
+    private void FoodImgGet(int foodNumber, string Direction, string foodname)
     {
-
-        if (File.Exists(FoodImgUrl))
+        Image target = Direction == "Left" ? LeftFoodImg : RightFoodImg;
+        Sprite foodSprite = FoodImageCatalog.Get(foodNumber);
+        FoodImageCatalog.Apply(target, foodNumber);
+        TextMeshProUGUI nameLabel = target.GetComponentInChildren<TextMeshProUGUI>();
+        if (nameLabel != null)
         {
-            
+            Vector2 textPosition = nameLabel.gameObject.transform.localPosition;
+            nameLabel.color = foodSprite != null
+                ? GetFoodTextColor(foodSprite.texture, textPosition) : Color.black;
+            nameLabel.text = foodname;
         }
-        else
-        {
-           FoodImgUrl = FoodImgUrl.Replace(".jpg",".png");
-        }
-        Debug.Log("FoodImgurl " + FoodImgUrl);
-        byte[] imagedata = System.IO.File.ReadAllBytes(FoodImgUrl);
-
-        Texture2D tex = new Texture2D(2, 2);
-        tex.LoadImage(imagedata);
-
-        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-        if(Direction.Equals("Left"))
-        {
-            LeftFoodImg.sprite = sprite;
-            TextMeshProUGUI LeftFoodname = LeftFoodImg.GetComponentInChildren<TextMeshProUGUI>();
-            Vector2 Textvector = LeftFoodname.gameObject.transform.localPosition;
-            LeftFoodname.color = GetFoodTextColor(tex, Textvector);
-            LeftFoodname.text = foodname;
-        }
-        else if(Direction.Equals("Right"))
-        {
-            RightFoodImg.sprite = sprite;
-            TextMeshProUGUI RightFoodname = RightFoodImg.GetComponentInChildren<TextMeshProUGUI>();
-            Vector2 Textvector = RightFoodname.gameObject.transform.localPosition;
-            RightFoodname.color = GetFoodTextColor(tex, Textvector);
-            RightFoodname.text = foodname;
-        }
-
     }
 
     private Color GetFoodTextColor(Texture2D image, Vector2 Textvector)
     {
         Color ReturnColor = Color.black;
-        Color imgColor = image.GetPixel((int)Textvector.x / 2, (int)Textvector.y / 2);
+        Color imgColor = image.GetPixel(
+            Mathf.Clamp(Mathf.RoundToInt(image.width / 2f + Textvector.x / 2f), 0, image.width - 1),
+            Mathf.Clamp(Mathf.RoundToInt(image.height / 2f + Textvector.y / 2f), 0, image.height - 1));
 
         float brightness = imgColor.r * 0.299f + imgColor.g * 0.587f + imgColor.b * 0.114f;
         float threshold = 0.5f;
