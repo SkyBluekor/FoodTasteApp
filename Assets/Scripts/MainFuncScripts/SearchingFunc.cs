@@ -49,7 +49,7 @@ public class SearchingFunc : MonoBehaviour
                 }
             }
         }
-        Debug.Log("�˻�: " +Searching);
+        Debug.Log("°Ë»ö: " +Searching);
       
         KmpValue = new List<string>();
 
@@ -172,7 +172,7 @@ public class SearchingFunc : MonoBehaviour
     }
     private void GetFoodName()
     {
-        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";";
+        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
         MySqlConnection conn = new MySqlConnection(connStr);
         conn.Open();
         MySqlCommand cmd;
