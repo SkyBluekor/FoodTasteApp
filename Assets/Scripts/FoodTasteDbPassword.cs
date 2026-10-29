@@ -10,6 +10,7 @@ public static class FoodTasteDbPassword
 {
     private const string Variable = "FOODTASTE_DB_PASSWORD";
     private static bool missingReported;
+    private static bool fallbackReported;
 
     public static string Resolve()
     {
@@ -21,7 +22,14 @@ public static class FoodTasteDbPassword
         {
             value = Environment.GetEnvironmentVariable(Variable, EnvironmentVariableTarget.User);
             if (!string.IsNullOrWhiteSpace(value))
+            {
+                if (!fallbackReported)
+                {
+                    fallbackReported = true;
+                    Debug.Log("[FoodTasteDB] Reading MySQL password from Windows user environment.");
+                }
                 return value;
+            }
         }
         catch (PlatformNotSupportedException)
         {
