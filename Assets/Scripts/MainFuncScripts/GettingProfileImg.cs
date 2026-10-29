@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class GettingProfileImg : MonoBehaviour
 {
     private string CurrentId = "";
-    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private string previousText;
     private float delayTime = 0.05f;
     private bool isfirstclick = true;
@@ -56,12 +56,12 @@ public class GettingProfileImg : MonoBehaviour
         bool exists = IDandBlobs.Any(item => item.Item1.Equals(newText,StringComparison.OrdinalIgnoreCase));
         if(exists )
         {
-            Debug.Log("¸®½ºÆ®¿¡ ÀÌ¹Ì Á¸Àç");
+            Debug.Log("ë¦¬ìŠ¤íŠ¸ì— ì´ë¯¸ ì¡´ì¬");
             
         }
         else
         {
-            Debug.Log("¾ÆÀÌµğ¿Í BLOB ¸®½ºÆ®¿¡ Ãß°¡");
+            Debug.Log("ì•„ì´ë””ì™€ BLOB ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€");
             GetBLOB(newText);
 
             foreach (var item in IDandBlobs)
@@ -87,7 +87,7 @@ public class GettingProfileImg : MonoBehaviour
         }
         else
         {
-            Debug.Log("newID´Â ¸®½ºÆ®¿¡ Á¸ÀçÇÏÁö X");
+            Debug.Log("newIDëŠ” ë¦¬ìŠ¤íŠ¸ì— ì¡´ì¬í•˜ì§€ X");
         }
 
 
@@ -185,7 +185,7 @@ public class GettingProfileImg : MonoBehaviour
     {        
         for(int i = 0; i < FriendViewContent.transform.childCount; i++)
         {
-            Debug.Log("¾ÆÀÌÅÛ Ãß°¡");
+            Debug.Log("ì•„ì´í…œ ì¶”ê°€");
             GameObject childObj = FriendViewContent.transform.GetChild(i).gameObject;
             Debug.Log(childObj.name);
             Image[] imgComponent = childObj.GetComponentsInChildren<Image>();
@@ -215,9 +215,9 @@ public class GettingProfileImg : MonoBehaviour
     {
         string[] splitInput = input.Split(new char[] { '(', ')' }, System.StringSplitOptions.RemoveEmptyEntries);
 
-        if (splitInput.Length > 1) // °ıÈ£ ¾ÈÀÇ ¹®ÀÚ¿­ÀÌ Á¸ÀçÇÏ´Â °æ¿ì¿¡¸¸ ¹İÈ¯
+        if (splitInput.Length > 1) // ê´„í˜¸ ì•ˆì˜ ë¬¸ìì—´ì´ ì¡´ì¬í•˜ëŠ” ê²½ìš°ì—ë§Œ ë°˜í™˜
             return splitInput[1];
 
-        return ""; // °ıÈ£ ¾ÈÀÇ ¹®ÀÚ¿­ÀÌ ¾ø´Â °æ¿ì ºó ¹®ÀÚ¿­ ¹İÈ¯
+        return ""; // ê´„í˜¸ ì•ˆì˜ ë¬¸ìì—´ì´ ì—†ëŠ” ê²½ìš° ë¹ˆ ë¬¸ìì—´ ë°˜í™˜
     }
 }
