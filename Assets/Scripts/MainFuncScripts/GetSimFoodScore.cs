@@ -353,17 +353,20 @@ public class GetSimFoodScore : MonoBehaviour
             PreFoodNameText.text = RecArr[i].Item2;
             preScoreText.text = RecArr[i].Item3.ToString();
 
-            // Every recommended FoodNum is matched to the same numbered photo in FoodImg.
-            // These nine existing rows contain text/rank graphics, but no food thumbnail.
-            int foodNumber = i < lastRecommendedFoodNumbers.Count ? lastRecommendedFoodNumbers[i] : 0;
+            // Use the existing 350x100 RankPlaceImg slot instead of creating
+            // the extra tiny thumbnail. Preserve the original text layout.
+            int foodNumber = i < lastRecommendedFoodNumbers.Count
+                ? lastRecommendedFoodNumbers[i] : 0;
             if (foodNumber == 0)
                 FoodNameToNum.TryGetValue(RecArr[i].Item2, out foodNumber);
+
             RectTransform row = Image.GetComponent<RectTransform>();
-            FoodImageCatalog.ApplyThumbnail(row, foodNumber, 390f, 92f);
-            // Leave a dedicated column for the photo instead of covering food names.
-            RectTransform nameRect = PreFoodNameText.rectTransform;
-            nameRect.anchoredPosition = new Vector2(100f, nameRect.anchoredPosition.y);
-            nameRect.sizeDelta = new Vector2(1100f, nameRect.sizeDelta.y);
+            FoodImageCatalog.RemoveLegacyThumbnail(row);
+            Transform originalImage = Image.transform.Find("RankPlaceImg");
+            if (originalImage != null)
+                FoodImageCatalog.ApplyToExistingSlot(originalImage.GetComponent<Image>(), foodNumber);
+            else
+                Debug.LogWarning("[FoodTasteApp] Missing RankPlaceImg in recommendation row " + x);
 
 
         }
