@@ -153,7 +153,7 @@ public class IntroManager : MonoBehaviour
             }
             if(IDCheck && PwdCheck)
             {
-                Debug.Log("·Î±×ÀÎ ¼º°ø");
+                Debug.Log("로그인 성공");
                 SuccessLogin();
                 string playerid = PlayerPrefs.GetString("playerid");
                 SceneManager.LoadScene("MainFuncScene");
