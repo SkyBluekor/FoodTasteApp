@@ -13,7 +13,7 @@ using UnityEngine.UI;
 
 public class For_Search_history : MonoBehaviour
 {
-    private string connStr =  "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private string connStr =  "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private string CurrentId = "dtdt5486";
     private string todaydate = DateTime.Now.ToString("yyyy-MM-dd");
     private string AvgFoodScore, TotalFoodSearchCount, TodaySearchCount;
@@ -40,7 +40,7 @@ public class For_Search_history : MonoBehaviour
         foreach (Transform child in children)
         {
             TextMeshProUGUI textmesh = child.GetComponent<TextMeshProUGUI>();
-            if (textmesh != null && textmesh.text !="øπªÛ ¡°ºˆ" && textmesh.text != "∞Àªˆ »Ωºˆ" && textmesh.text != "∏‘¿∫ »Ωºˆ")  
+            if (textmesh != null && textmesh.text !="ÏòàÏÉÅ Ï†êÏàò" && textmesh.text != "Í≤ÄÏÉâ ÌöüÏàò" && textmesh.text != "Î®πÏùÄ ÌöüÏàò")  
             { 
                 textmeshes.Add(textmesh);
                 Debug.Log(textmesh.text);
@@ -105,7 +105,7 @@ public class For_Search_history : MonoBehaviour
 
 
 
-        Debug.Log("«ˆ¿Á ¿ΩΩƒ π¯»£: " +CurrentFoodNum + " «ˆ¿Á ¿ΩΩƒ ¿Ã∏ß: " + textmeshes[0].text);
+        Debug.Log("ÌòÑÏû¨ ÏùåÏãù Î≤àÌò∏: " +CurrentFoodNum + " ÌòÑÏû¨ ÏùåÏãù Ïù¥Î¶Ñ: " + textmeshes[0].text);
 
     }
 
@@ -173,9 +173,9 @@ public class For_Search_history : MonoBehaviour
         }
         finally { conn.Close(); }
         
-        RateTxt.text = "∆Ú±’ ¡°ºˆ\n" +AvgFoodScore +"¡°";
-        TodaySearchTxt.text = "ø¿¥√ ∞Àªˆ »Ωºˆ\n" + TodaySearchCount + "π¯";
-        SearchCountTxt.text = "√— ∞Àªˆ »Ωºˆ\n" + TotalFoodSearchCount + "π¯";
+        RateTxt.text = "ÌèâÍ∑† Ï†êÏàò\n" +AvgFoodScore +"Ï†ê";
+        TodaySearchTxt.text = "Ïò§Îäò Í≤ÄÏÉâ ÌöüÏàò\n" + TodaySearchCount + "Î≤à";
+        SearchCountTxt.text = "Ï¥ù Í≤ÄÏÉâ ÌöüÏàò\n" + TotalFoodSearchCount + "Î≤à";
     }
     private void ShowReplyContent()
     {
@@ -242,21 +242,21 @@ public class For_Search_history : MonoBehaviour
 
                 foreach (TextMeshProUGUI items in textmeshes)
                 {
-                    Debug.Log("textmeshpro ¿Ã∏ß: " + items.name);
+                    Debug.Log("textmeshpro Ïù¥Î¶Ñ: " + items.name);
                 }
                 if (ReplyList[i].Item1 != CurrentId)
                 {
                     DeleteBtn.gameObject.SetActive(false);
                 }
-                textmeshes[0].text = ReplyList[i].Item1; //æ∆¿Ãµ
-                textmeshes[1].text = GetTimeAgo(ReplyList[i].Item2); // ∞‘Ω√≥Ø¬•
-                textmeshes[2].text = ReplyList[i].Item3.ToString(); // ≥ªøÎ
-                textmeshes[3].text = ReplyList[i].Item4.ToString() +"¡°"; // ¡°ºˆ
-                if (textmeshes[3].text == "0¡°")
+                textmeshes[0].text = ReplyList[i].Item1; //ÏïÑÏù¥Îîî
+                textmeshes[1].text = GetTimeAgo(ReplyList[i].Item2); // Í≤åÏãúÎÇ†Ïßú
+                textmeshes[2].text = ReplyList[i].Item3.ToString(); // ÎÇ¥Ïö©
+                textmeshes[3].text = ReplyList[i].Item4.ToString() +"Ï†ê"; // Ï†êÏàò
+                if (textmeshes[3].text == "0Ï†ê")
                 {
-                    textmeshes[3].text = "πÃ∆Ú∞°";
+                    textmeshes[3].text = "ÎØ∏ÌèâÍ∞Ä";
                 }
-                textmeshes[4].text = ReplyList[i].Item5.ToString(); // ¥Ò±€ID
+                textmeshes[4].text = ReplyList[i].Item5.ToString(); // ÎåìÍ∏ÄID
                 byte[] proimg = UserProDic[ReplyList[i].Item1];
                 if(proimg.Length > 0)
                 {
@@ -334,7 +334,7 @@ public class For_Search_history : MonoBehaviour
         List<TextMeshProUGUI> TextList = new List<TextMeshProUGUI>();
         TextList.AddRange(ParentObj.GetComponentsInChildren<TextMeshProUGUI>());
         int CommentId =  int.Parse(TextList[TextList.Count - 1].text);
-        Debug.Log("¥Ò±€ π¯»£: "+CommentId);
+        Debug.Log("ÎåìÍ∏Ä Î≤àÌò∏: "+CommentId);
 
         MySqlConnection conn = new MySqlConnection(connStr);
         try
@@ -360,23 +360,23 @@ public class For_Search_history : MonoBehaviour
 
         if (timeSince.TotalMinutes < 1)
         {
-            return "πÊ±› ¿¸";
+            return "Î∞©Í∏à Ï†Ñ";
         }
         else if (timeSince.TotalMinutes < 60)
         {
-            return $"{(int)timeSince.TotalMinutes}∫– ¿¸";
+            return $"{(int)timeSince.TotalMinutes}Î∂Ñ Ï†Ñ";
         }
         else if (timeSince.TotalHours < 24)
         {
-            return $"{(int)timeSince.TotalHours}Ω√∞£ ¿¸";
+            return $"{(int)timeSince.TotalHours}ÏãúÍ∞Ñ Ï†Ñ";
         }
         else if (timeSince.TotalDays > 7)
         {
-            return $"{(int)timeSince.TotalDays}¿œ ¿¸";
+            return $"{(int)timeSince.TotalDays}Ïùº Ï†Ñ";
         }
         else
         {
-            return $"{(int)(timeSince.TotalDays / 7)}¡÷ ¿¸";
+            return $"{(int)(timeSince.TotalDays / 7)}Ï£º Ï†Ñ";
         }
     }
     public void ContentPanelExitBtn()
