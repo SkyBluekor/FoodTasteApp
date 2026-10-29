@@ -13,6 +13,7 @@ public class ForSearching : MonoBehaviour
     List<string> FoodNum;
     List<string> FoodName;
     List<string> KmpValue;
+    private readonly Dictionary<string, int> foodNumbersByName = new Dictionary<string, int>();
     [SerializeField]
     private GameObject RelatedPrefab;
     [SerializeField]
@@ -161,6 +162,7 @@ public class ForSearching : MonoBehaviour
         MySqlCommand cmd;
         FoodName = new List<string>();
         FoodNum = new List<string>();
+        foodNumbersByName.Clear();
 
         string selectFoodName = "SELECT foodnum, FoodName FROM Fooddata";
 
@@ -171,8 +173,12 @@ public class ForSearching : MonoBehaviour
 
             while (reader.Read())
             {
-                FoodNum.Add(reader.GetString(0));
-                FoodName.Add(reader.GetString(1));
+                int foodNo = reader.GetInt32(0);
+                string foodName = reader.GetString(1);
+                FoodNum.Add(foodNo.ToString());
+                FoodName.Add(foodName);
+                if (!foodNumbersByName.ContainsKey(foodName))
+                    foodNumbersByName.Add(foodName, foodNo);
             }
 
             reader.Close();
@@ -210,7 +216,14 @@ public class ForSearching : MonoBehaviour
         {
             string kmp = KmpValue[i];
             GameObject resultObject = GetObjectFromPool();
-            resultObject.GetComponentInChildren<TextMeshProUGUI>().text = kmp;
+            TextMeshProUGUI label = resultObject.GetComponentInChildren<TextMeshProUGUI>();
+            label.text = kmp;
+            int foodNo;
+            if (foodNumbersByName.TryGetValue(kmp, out foodNo))
+                FoodImageCatalog.ApplyThumbnail(resultObject.GetComponent<RectTransform>(), foodNo, 7f, 42f);
+            else
+                FoodImageCatalog.ApplyThumbnail(resultObject.GetComponent<RectTransform>(), 0, 7f, 42f);
+            label.margin = new Vector4(Mathf.Max(label.margin.x, 52f), label.margin.y, label.margin.z, label.margin.w);
             resultObject.transform.SetParent(SearchingContent, false);
             resultObject.SetActive(true);
             RelatedSearch.SetActive(true);
