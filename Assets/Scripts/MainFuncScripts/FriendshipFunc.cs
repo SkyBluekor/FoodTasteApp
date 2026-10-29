@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class FriendshipFunc : MonoBehaviour
 {
-    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private string currentID;
     private List<(string, string)> CurrentMyfriends = new List<(string, string)>();
     private List<(string, string, string)> RequestInfoList;
@@ -231,7 +231,7 @@ public class FriendshipFunc : MonoBehaviour
 
         if(string.IsNullOrEmpty(requestID) ) 
         {
-            RequestIDinput.text = "À¯È¿ÇÑ »ç¿ëÀÚ ID¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä.";
+            RequestIDinput.text = "ìœ íš¨í•œ ì‚¬ìš©ì IDë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”.";
             StartCoroutine(DisableFriendRequesObj(1));
             return;
         }
@@ -240,13 +240,13 @@ public class FriendshipFunc : MonoBehaviour
 
         if(containsItem)
         {
-            RequestIDinput.text = "ÀÌ¹Ì µî·ÏµÈ Ä£±¸ÀÔ´Ï´Ù.";
+            RequestIDinput.text = "ì´ë¯¸ ë“±ë¡ëœ ì¹œêµ¬ì…ë‹ˆë‹¤.";
             StartCoroutine (DisableFriendRequesObj(1));
             return;
         }
-        /* ¼ö¶ô - acceptance
-               °ÅÀı - rejection
-               ´ë±âÁß - pending
+        /* ìˆ˜ë½ - acceptance
+               ê±°ì ˆ - rejection
+               ëŒ€ê¸°ì¤‘ - pending
             */
 
         foreach (var receiver_id in RequestInfoList)
@@ -256,19 +256,19 @@ public class FriendshipFunc : MonoBehaviour
                 string Getstatus = receiver_id.Item2;
                 if(Getstatus == "acceptance")
                 {
-                    RequestIDinput.text = "ÀÌ¹Ì ¼ö¶ôÇÑ Ä£±¸ÀÔ´Ï´Ù.";
+                    RequestIDinput.text = "ì´ë¯¸ ìˆ˜ë½í•œ ì¹œêµ¬ì…ë‹ˆë‹¤.";
                     StartCoroutine(DisableFriendRequesObj(1));
                     return;
                 }
                 else if( Getstatus == "rejection")
                 {
-                    RequestIDinput.text = "¿äÃ»ÀÌ °ÅÀıµÇ¾ú½À´Ï´Ù.";
+                    RequestIDinput.text = "ìš”ì²­ì´ ê±°ì ˆë˜ì—ˆìŠµë‹ˆë‹¤.";
                     StartCoroutine(DisableFriendRequesObj(1));
                     return;
                 }
                 else if( Getstatus == "pending")
                 {
-                    RequestIDinput.text = "Ä£±¸ ¼ö¶ôÀ» ´ë±âÁßÀÔ´Ï´Ù.";
+                    RequestIDinput.text = "ì¹œêµ¬ ìˆ˜ë½ì„ ëŒ€ê¸°ì¤‘ì…ë‹ˆë‹¤.";
                     StartCoroutine(DisableFriendRequesObj(1));
                     return;
                 }
@@ -290,7 +290,7 @@ public class FriendshipFunc : MonoBehaviour
             }
             reader.Close();
 
-            Debug.Log("¾ÆÀÌµğ Á¸Àç¿©ºÎ: " + Existid);
+            Debug.Log("ì•„ì´ë”” ì¡´ì¬ì—¬ë¶€: " + Existid);
             if (Existid == 1)
             {
                 cmd = new MySqlCommand("insert into friend_requests (sender_id, receiver_id, status) values (@sender_id, @receiver_id, @status)", conn);
@@ -298,13 +298,13 @@ public class FriendshipFunc : MonoBehaviour
                 cmd.Parameters.AddWithValue("@receiver_id", RequestIDinput.text);
                 cmd.Parameters.AddWithValue("@status", "pending");
                 cmd.ExecuteNonQuery();
-                RequestIDinput.text = "Ä£±¸ ¿äÃ»À» º¸³Â½À´Ï´Ù.";
+                RequestIDinput.text = "ì¹œêµ¬ ìš”ì²­ì„ ë³´ëƒˆìŠµë‹ˆë‹¤.";
                 StartCoroutine(DisableFriendRequesObj(1));
                 return;
             }
             else 
             {
-                RequestIDinput.text = "Á¸ÀçÇÏÁö ¾Ê´Â IDÀÔ´Ï´Ù.";
+                RequestIDinput.text = "ì¡´ì¬í•˜ì§€ ì•ŠëŠ” IDì…ë‹ˆë‹¤.";
                 StartCoroutine (DisableFriendRequesObj(1));
                 return;
             }
@@ -314,7 +314,7 @@ public class FriendshipFunc : MonoBehaviour
             Debug.Log(e);
             if(e.Number == 1062)
             {
-                RequestIDinput.text = "ÀÌ¹Ì Ä£±¸µî·ÏÀÌ µÈ »óÅÂÀÔ´Ï´Ù.";
+                RequestIDinput.text = "ì´ë¯¸ ì¹œêµ¬ë“±ë¡ì´ ëœ ìƒíƒœì…ë‹ˆë‹¤.";
                 StartCoroutine(DisableFriendRequesObj(1));
 
             }
@@ -384,7 +384,7 @@ public class FriendshipFunc : MonoBehaviour
         Button btn = clone.GetComponentInChildren<Button>();
         btn.onClick.AddListener(() => 
         {
-            //Ä£±¸¿ÍÀÇ Ã¤ÆÃÃ¢À¸·Î ÀÔÀåÇÏ´Â ¹öÆ° Listener
+            //ì¹œêµ¬ì™€ì˜ ì±„íŒ…ì°½ìœ¼ë¡œ ì…ì¥í•˜ëŠ” ë²„íŠ¼ Listener
             ChatRoomFunction(FriendID);
         });
     }
@@ -441,7 +441,7 @@ public class FriendshipFunc : MonoBehaviour
 
     private void ChatRoomFunction(string friendID)
     {
-        Debug.Log("ChatRoomFunc ¸Ş¼Òµå ÁøÀÔ");
+        Debug.Log("ChatRoomFunc ë©”ì†Œë“œ ì§„ì…");
         if(FriendListPanel.activeSelf || FriendRequestPanel.activeSelf) 
         { 
             FriendListPanel.SetActive(false);
@@ -454,11 +454,11 @@ public class FriendshipFunc : MonoBehaviour
 
         ChatEnterBtn.onClick.AddListener(() =>
         {
-            Debug.Log("ChatEnter¹öÆ° ±â´É »ğÀÔ");
+            Debug.Log("ChatEnterë²„íŠ¼ ê¸°ëŠ¥ ì‚½ì…");
             ChatSendButtonFunc(friendID);
         });
 
-        Debug.Log("inputField ±â´É »ğÀÔ");
+        Debug.Log("inputField ê¸°ëŠ¥ ì‚½ì…");
         ChatContent.onEndEdit.AddListener(ChatInput);
 
         
@@ -496,7 +496,7 @@ public class FriendshipFunc : MonoBehaviour
             }
             foreach(Message m in messages)
             {
-                Debug.Log(m.senderID + "Àü¼ÛÀÚ " + m.messageText);
+                Debug.Log(m.senderID + "ì „ì†¡ì " + m.messageText);
             }
 
             messages.Sort((m1,m2) => m1.send_at.CompareTo(m2.send_at));
@@ -557,15 +557,15 @@ public class FriendshipFunc : MonoBehaviour
         string relativeTime = string.Empty;
         if (minuteDiff < 60)
         {
-            relativeTime = $"{minuteDiff}ºĞ Àü";
+            relativeTime = $"{minuteDiff}ë¶„ ì „";
         }
         else if (hoursDiff < 24)
         {
-            relativeTime = $"{hoursDiff}½Ã°£ Àü";
+            relativeTime = $"{hoursDiff}ì‹œê°„ ì „";
         }
         else
         {
-            relativeTime = $"{daysDiff}ÀÏ Àü";
+            relativeTime = $"{daysDiff}ì¼ ì „";
         }
         return relativeTime;
     }
@@ -653,7 +653,7 @@ public class FriendshipFunc : MonoBehaviour
     {
         while (true) 
         {
-            Debug.Log("Fetch µ¿ÀÛÁß");
+            Debug.Log("Fetch ë™ì‘ì¤‘");
             string selectQuery = "select * from messages where sender_id = @friendid and receiver_id = @currentid";
             MySqlConnection conn = new MySqlConnection(connStr);
             MySqlCommand cmd;
@@ -664,12 +664,12 @@ public class FriendshipFunc : MonoBehaviour
                 cmd.Parameters.AddWithValue("@friendid", FriendID);
                 cmd.Parameters.AddWithValue("@currentid", currentID);
 
-                Debug.Log("Reader Àü");
+                Debug.Log("Reader ì „");
 
                 MySqlDataReader reader = cmd.ExecuteReader();
                 while (reader.Read()) 
                 {
-                    Debug.Log("Reader Áß");
+                    Debug.Log("Reader ì¤‘");
                     string message = reader.GetString("message");
                     string sender_id = reader.GetString("sender_id");
                     DateTime send_at = reader.GetDateTime("send_at");
@@ -682,7 +682,7 @@ public class FriendshipFunc : MonoBehaviour
                 }
                 reader.Close();
 
-                Debug.Log("Reader ÈÄ");
+                Debug.Log("Reader í›„");
             }
             catch(MySqlException e) 
             {
@@ -728,7 +728,7 @@ public class FriendshipFunc : MonoBehaviour
 
         if(!hasDuplicateDateTime) 
         {
-            Debug.Log("Ãß°¡µÆ³Ä");
+            Debug.Log("ì¶”ê°€ëëƒ");
             messages.Add(newMessage);
             GameObject clone = Instantiate(YourMessagePrefab, FriendChatScrollViewTransform);
             int count = ChatPrefabList.Count;
