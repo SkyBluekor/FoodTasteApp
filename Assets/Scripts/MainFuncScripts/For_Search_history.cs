@@ -111,22 +111,8 @@ public class For_Search_history : MonoBehaviour
 
     private void SetFoodContentPanel(int CurrentFoodnum, string Foodname)
     {
-        string FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + CurrentFoodnum + ".jpg";
-        if(File.Exists(FoodImgUrl)) 
-        {
-            FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + CurrentFoodnum + ".jpg";
-        }
-        else
-        {
-            FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + CurrentFoodnum + ".png";
-        }
-        byte[] imagedata = System.IO.File.ReadAllBytes(FoodImgUrl);
-        Texture2D tex = new Texture2D(2, 2);
-        tex.LoadImage(imagedata);
+        FoodImageCatalog.Apply(FoodContentFoodimg, CurrentFoodnum);
 
-        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-        FoodContentFoodimg.sprite = sprite;
-        
         FoodNametxt.text = Foodname;
 
         MySqlConnection conn = new MySqlConnection(connStr);
