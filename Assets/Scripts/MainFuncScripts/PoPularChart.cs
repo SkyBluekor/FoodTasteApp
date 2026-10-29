@@ -10,7 +10,7 @@ public class PoPularChart : MonoBehaviour
     public Button PoPularMenuBtn;
     public Button SetTodayBtn, SetWeekBtn, SetTotalBtn;
     public GameObject PanelCheck;
-    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private List<(string,int)> TotalSearchCount;
     private List<(string,int)> TotalEatenCount;
     private List<(string ,int)> TodaySearchCount;
@@ -250,7 +250,7 @@ public class PoPularChart : MonoBehaviour
             }
             else if(i  > 2 && i < 7)
             {
-                Debug.Log("xÀÇ °ª" + x);
+                Debug.Log("xì˜ ê°’" + x);
                 GameObject obj = GameObject.Find("Popular" + x + "th");
                 TextMeshProUGUI[] textMeshes = obj.GetComponentsInChildren<TextMeshProUGUI>();
                 TextMeshList.AddRange(textMeshes);
@@ -291,7 +291,7 @@ public class PoPularChart : MonoBehaviour
     }
     private void PoPularSearchBtnAction(List<List<TextMeshProUGUI>> PlaceObj)
     {
-        Debug.Log(PlaceObj.Count + "placeobj °¹¼ö" + TotalSearchCount.Count + "searchcoun °¹¼ö");
+        Debug.Log(PlaceObj.Count + "placeobj ê°¯ìˆ˜" + TotalSearchCount.Count + "searchcoun ê°¯ìˆ˜");
         CurrentTag = "search";
         List<(string, int)> CurrentList = new List<(string, int)>();
 
@@ -322,7 +322,7 @@ public class PoPularChart : MonoBehaviour
                     PlaceObj[i][0].transform.parent.gameObject.SetActive(true);
                     if(j == 0)
                     {
-                        PlaceObj[i][j].text = "°Ë»ö È½¼ö";
+                        PlaceObj[i][j].text = "ê²€ìƒ‰ íšŸìˆ˜";
                     }
                     else if(j == 1)
                     {
@@ -337,7 +337,7 @@ public class PoPularChart : MonoBehaviour
             }
             else
             {
-                Debug.Log("iÀÇ °ª" + i);
+                Debug.Log("iì˜ ê°’" + i);
                 GameObject ForSetFalse = PlaceObj[i][0].transform.parent.gameObject;
                 ForSetFalse.SetActive(false);
             }
@@ -374,7 +374,7 @@ public class PoPularChart : MonoBehaviour
                     PlaceObj[i][0].transform.parent.gameObject.SetActive(true);
                     if (j == 0)
                     {
-                        PlaceObj[i][j].text = "¸ÔÀº È½¼ö";
+                        PlaceObj[i][j].text = "ë¨¹ì€ íšŸìˆ˜";
                     }
                     else if (j == 1)
                     {
@@ -389,7 +389,7 @@ public class PoPularChart : MonoBehaviour
             }
             else
             {
-                Debug.Log("iÀÇ °ª" + i);
+                Debug.Log("iì˜ ê°’" + i);
                 GameObject ForSetFalse = PlaceObj[i][0].transform.parent.gameObject;
                 ForSetFalse.SetActive(false);
 
