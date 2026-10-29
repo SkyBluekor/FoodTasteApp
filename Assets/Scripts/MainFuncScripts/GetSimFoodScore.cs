@@ -324,31 +324,36 @@ public class GetSimFoodScore : MonoBehaviour
     //내가 좋아할만한 음식의 이름과 예상점수를 TextUI로 출력
     private void SetNameScore(List<(string,string,double)> RecArr)
     {
-        GameObject Image;
+        GameObject rowObject;
         
         for (int i = 0; i < RecArr.Count;i++)
         {
             int x = i+1;
             if (i == 0)
             {
-                Image = GameObject.Find(x + "st");
+                rowObject = GameObject.Find(x + "st");
             }
             else if( i == 1)
             {
-                Image = GameObject.Find(x + "nd");
+                rowObject = GameObject.Find(x + "nd");
             }
             else if( i == 2)
 
             {
-                Image = GameObject.Find(x + "rd");
+                rowObject = GameObject.Find(x + "rd");
             }
             else
             {
-                Image = GameObject.Find(x + "th");
+                rowObject = GameObject.Find(x + "th");
             }
             
-            TextMeshProUGUI preScoreText = Image.transform.Find("PreScoreText").GetComponent<TextMeshProUGUI>();
-            TextMeshProUGUI PreFoodNameText = Image.transform.Find("PreFoodNameText").GetComponent<TextMeshProUGUI>();
+            if (rowObject == null)
+            {
+                Debug.LogWarning("[FoodTasteApp] Missing recommendation row #" + x);
+                continue;
+            }
+            TextMeshProUGUI preScoreText = rowObject.transform.Find("PreScoreText").GetComponent<TextMeshProUGUI>();
+            TextMeshProUGUI PreFoodNameText = rowObject.transform.Find("PreFoodNameText").GetComponent<TextMeshProUGUI>();
 
             PreFoodNameText.text = RecArr[i].Item2;
             preScoreText.text = RecArr[i].Item3.ToString();
@@ -360,11 +365,11 @@ public class GetSimFoodScore : MonoBehaviour
             if (foodNumber == 0)
                 FoodNameToNum.TryGetValue(RecArr[i].Item2, out foodNumber);
 
-            RectTransform row = Image.GetComponent<RectTransform>();
+            RectTransform row = rowObject.GetComponent<RectTransform>();
             FoodImageCatalog.RemoveLegacyThumbnail(row);
-            Transform originalImage = Image.transform.Find("RankPlaceImg");
+            Transform originalImage = rowObject.transform.Find("RankPlaceImg");
             if (originalImage != null)
-                FoodImageCatalog.ApplyToExistingSlot(originalImage.GetComponent<Image>(), foodNumber);
+                FoodImageCatalog.ApplyToExistingSlot(originalImage.GetComponent<UnityEngine.UI.Image>(), foodNumber);
             else
                 Debug.LogWarning("[FoodTasteApp] Missing RankPlaceImg in recommendation row " + x);
 
