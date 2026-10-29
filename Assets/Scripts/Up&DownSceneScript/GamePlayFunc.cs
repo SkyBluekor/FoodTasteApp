@@ -10,7 +10,7 @@ using Color = UnityEngine.Color;
 
 public class GamePlayFunc : MonoBehaviour
 {
-    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private string currentID = "";
     private string currentNickName = "";
     private List<(string, double, string)> FoodAvgScoreData; //foodnum, foodscore, foodname
@@ -85,7 +85,7 @@ public class GamePlayFunc : MonoBehaviour
 
     private void newStage()
     {
-        Debug.Log("¥–≥◊¿”: " + currentNickName);
+        Debug.Log("ÎãâÎÑ§ÏûÑ: " + currentNickName);
         foreach(var t in textMeshProUGUIs)
         {
             t.gameObject.SetActive(false);
@@ -128,7 +128,7 @@ public class GamePlayFunc : MonoBehaviour
         {
             if(tuple.Item3 != item1name)
             {
-                Debug.Log("tupleæ∆¿Ã≈€ " + tuple.Item2 + "æ∆¿Ã≈€1 Ω∫ƒ⁄æÓ " + item1Score);
+                Debug.Log("tupleÏïÑÏù¥ÌÖú " + tuple.Item2 + "ÏïÑÏù¥ÌÖú1 Ïä§ÏΩîÏñ¥ " + item1Score);
                 if(tuple.Item2 != item1Score)
                 {
                     item2index = item2count;
@@ -157,11 +157,11 @@ public class GamePlayFunc : MonoBehaviour
         FoodImgGet(LeftFoodImgUrl, "Left", FoodAvgScoreData[item1index].Item3);
         FoodImgGet(RightFoodImgUrl, "Right", FoodAvgScoreData[item2index].Item3);
 
-        Debug.Log("item1: ¿Ã∏ß " + FoodAvgScoreData[item1index].Item3 + "item1 ¡°ºˆ: " + FoodAvgScoreData[item1index].Item2);
-        Debug.Log("item1: ¿Ã∏ß " + FoodAvgScoreData[item2index].Item3 + "item1 ¡°ºˆ: " + FoodAvgScoreData[item2index].Item2);
+        Debug.Log("item1: Ïù¥Î¶Ñ " + FoodAvgScoreData[item1index].Item3 + "item1 Ï†êÏàò: " + FoodAvgScoreData[item1index].Item2);
+        Debug.Log("item1: Ïù¥Î¶Ñ " + FoodAvgScoreData[item2index].Item3 + "item1 Ï†êÏàò: " + FoodAvgScoreData[item2index].Item2);
 
-        Debug.Log("æ∆¿Ã≈€1 ¿Ã∏ß: "+ item1name + " æ∆¿Ã≈€1 Ω∫ƒ⁄æÓ: " + item1Score);
-        Debug.Log("æ∆¿Ã≈€2 ¿Ã∏ß: " + item2name + " æ∆¿Ã≈€2 Ω∫ƒ⁄æÓ: " + item2Score);
+        Debug.Log("ÏïÑÏù¥ÌÖú1 Ïù¥Î¶Ñ: "+ item1name + " ÏïÑÏù¥ÌÖú1 Ïä§ÏΩîÏñ¥: " + item1Score);
+        Debug.Log("ÏïÑÏù¥ÌÖú2 Ïù¥Î¶Ñ: " + item2name + " ÏïÑÏù¥ÌÖú2 Ïä§ÏΩîÏñ¥: " + item2Score);
         RightFood.onClick.AddListener(() => ButtonClick(RightFood));
         LeftFood.onClick.AddListener(() => ButtonClick(LeftFood));
 
@@ -319,7 +319,7 @@ public class GamePlayFunc : MonoBehaviour
         LeftItemScore = FoodAvgScoreData[currentItem1Index].Item2;
         RightItemScore = FoodAvgScoreData[currentItem2Index].Item2;
 
-        Debug.Log("≈¨∏Øπˆ∆∞: " + ClickButton.name);
+        Debug.Log("ÌÅ¥Î¶≠Î≤ÑÌäº: " + ClickButton.name);
         string ClickButtonName = ClickButton.name;
         if(ClickButtonName == "LeftFood")
         {
@@ -460,8 +460,8 @@ public class GamePlayFunc : MonoBehaviour
             LeftFoodScore.text = DotTwoValue;
             RightFoodScore.text = DotTwoValue;
         }
-        LeftFoodScore.text = FoodAvgScoreData[currentItem1Index].Item2.ToString("F2") +" ¡°";
-        RightFoodScore.text = FoodAvgScoreData[currentItem2Index].Item2.ToString("F2")+ " ¡°";
+        LeftFoodScore.text = FoodAvgScoreData[currentItem1Index].Item2.ToString("F2") +" Ï†ê";
+        RightFoodScore.text = FoodAvgScoreData[currentItem2Index].Item2.ToString("F2")+ " Ï†ê";
         
     }
 
@@ -550,7 +550,7 @@ public class GamePlayFunc : MonoBehaviour
             foreach (var item in GetScoreData)
             {
                 Rank_List[count].Item1.text = item.Item1;
-                Rank_List[count].Item2.text = item.Item2.ToString() + " ¡°";
+                Rank_List[count].Item2.text = item.Item2.ToString() + " Ï†ê";
                 count++;
             }
         }
