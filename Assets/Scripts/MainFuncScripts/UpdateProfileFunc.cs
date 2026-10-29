@@ -17,7 +17,7 @@ public class UpdateProfileFunc : MonoBehaviour
 
     private string previousText;
     private string currentID = "";
-    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private MySqlConnection conn;
 
 
@@ -36,7 +36,7 @@ public class UpdateProfileFunc : MonoBehaviour
         try
         {
             conn.Open();
-            if (StateCheckText.text == "»ç¿ëÇÒ¼ö ¾ø´Â\nÆÄÀÏÇü½ÄÀÔ´Ï´Ù.")
+            if (StateCheckText.text == "ì‚¬ìš©í• ìˆ˜ ì—†ëŠ”\níŒŒì¼í˜•ì‹ì…ë‹ˆë‹¤.")
             {
                 return;
             }
@@ -44,7 +44,7 @@ public class UpdateProfileFunc : MonoBehaviour
             previousText = StateCheckText.text;
             if(ImgBytes.Length > 16777215) 
             {
-                Debug.Log("ÆÄÀÏÀÇ Å©±â°¡ ³Ê¹« Å®´Ï´Ù.");
+                Debug.Log("íŒŒì¼ì˜ í¬ê¸°ê°€ ë„ˆë¬´ í½ë‹ˆë‹¤.");
                 StartCoroutine(MessageShow());
                 return;
             }
@@ -57,7 +57,7 @@ public class UpdateProfileFunc : MonoBehaviour
         }
         catch(MySqlException e) 
         { 
-            Debug.Log("µ¿ÀÛ½ÇÆĞ: " + e);
+            Debug.Log("ë™ì‘ì‹¤íŒ¨: " + e);
         }
         finally
         {
@@ -85,7 +85,7 @@ public class UpdateProfileFunc : MonoBehaviour
     {
         while(true) 
         {
-            StateCheckText.text = "ÀÌ¹ÌÁö ÆÄÀÏÀÇ Å©±â°¡ ³Ê¹« Å®´Ï´Ù.";
+            StateCheckText.text = "ì´ë¯¸ì§€ íŒŒì¼ì˜ í¬ê¸°ê°€ ë„ˆë¬´ í½ë‹ˆë‹¤.";
             yield return new WaitForSeconds(1f);
             StateCheckText.text = previousText;
 
@@ -94,9 +94,9 @@ public class UpdateProfileFunc : MonoBehaviour
 
     private IEnumerator ChSuccessFunc() 
     {
-        StateCheckText.text = "ÇÁ·ÎÇÊ ÀÌ¹ÌÁö°¡ º¯°æµÇ¾ú½À´Ï´Ù.";
+        StateCheckText.text = "í”„ë¡œí•„ ì´ë¯¸ì§€ê°€ ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.";
         yield return new WaitForSeconds(1f);
-        StateCheckText.text = "ÆÄÀÏ Á¤º¸";
+        StateCheckText.text = "íŒŒì¼ ì •ë³´";
         ChProPanel.SetActive(false);
 
     }
