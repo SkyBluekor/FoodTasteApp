@@ -11,7 +11,7 @@ using Image = UnityEngine.UI.Image;
 
 public class EatCheckPanelFunc : MonoBehaviour
 {
-    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     public TMPro.TMP_Dropdown MorningDropDown,AfterNoonDropDown,NightDropDown;
     public TMP_InputField MorningText, AfterNoonText, NightText;
     public TextMeshProUGUI HeadText;
@@ -64,7 +64,7 @@ public class EatCheckPanelFunc : MonoBehaviour
 
     private void TotalEatenBtnFunc()
     {
-        HeadText.text = "³»°¡ ÀÚÁÖ¸ÔÀº À½½Ä";
+        HeadText.text = "ë‚´ê°€ ìì£¼ë¨¹ì€ ìŒì‹";
         TextMeshProUGUI GetTextCount = TotalCountBtn.GetComponentInChildren<TextMeshProUGUI>();
         GetTextCount.color = Color.yellow;
         TextMeshProUGUI GetTextCheck = CheckEatenDayBtn.GetComponentInChildren<TextMeshProUGUI>();
@@ -75,7 +75,7 @@ public class EatCheckPanelFunc : MonoBehaviour
     }
     private void CheckEatenDayBtnFunc()
     {
-        HeadText.text = "¸ÔÀºÁö ¿À·¡µÈ À½½Ä";
+        HeadText.text = "ë¨¹ì€ì§€ ì˜¤ë˜ëœ ìŒì‹";
         TextMeshProUGUI GetTextCount = TotalCountBtn.GetComponentInChildren<TextMeshProUGUI>();
         GetTextCount.color = Color.black;
         TextMeshProUGUI GetTextCheck = CheckEatenDayBtn.GetComponentInChildren<TextMeshProUGUI>();
@@ -132,7 +132,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                 EatenFoodPrefabList.Add(item);
 
                 textmeshes[0].text = countEatenList[i].Item1;
-                textmeshes[1].text = textmeshes[1].text + countEatenList[i].Item2.ToString()+"È¸";
+                textmeshes[1].text = textmeshes[1].text + countEatenList[i].Item2.ToString()+"íšŒ";
 
                 textmeshes.Clear();
             }
@@ -252,7 +252,7 @@ public class EatCheckPanelFunc : MonoBehaviour
             else
             {
                 StartCoroutine(FoodCheckMessageSpawn(FoodCheckMessage));
-                Debug.Log("¼±ÅÃ »óÀÚ¿¡¼­ Á¸ÀçÇÏ´Â À½½Ä¸¸ °¡´ÉÇÕ´Ï´Ù.");
+                Debug.Log("ì„ íƒ ìƒìì—ì„œ ì¡´ì¬í•˜ëŠ” ìŒì‹ë§Œ ê°€ëŠ¥í•©ë‹ˆë‹¤.");
             }
         }
         else if (BtnName == "AfterNoonInput")
@@ -286,7 +286,7 @@ public class EatCheckPanelFunc : MonoBehaviour
             else
             {
                 StartCoroutine(FoodCheckMessageSpawn(FoodCheckMessage));
-                Debug.Log("¼±ÅÃ »óÀÚ¿¡¼­ Á¸ÀçÇÏ´Â À½½Ä¸¸ °¡´ÉÇÕ´Ï´Ù.");
+                Debug.Log("ì„ íƒ ìƒìì—ì„œ ì¡´ì¬í•˜ëŠ” ìŒì‹ë§Œ ê°€ëŠ¥í•©ë‹ˆë‹¤.");
             }
         }
         else if (BtnName == "NightInput")
@@ -320,7 +320,7 @@ public class EatCheckPanelFunc : MonoBehaviour
             else
             {
                 StartCoroutine(FoodCheckMessageSpawn(FoodCheckMessage));
-                Debug.Log("¼±ÅÃ »óÀÚ¿¡¼­ Á¸ÀçÇÏ´Â À½½Ä¸¸ °¡´ÉÇÕ´Ï´Ù.");
+                Debug.Log("ì„ íƒ ìƒìì—ì„œ ì¡´ì¬í•˜ëŠ” ìŒì‹ë§Œ ê°€ëŠ¥í•©ë‹ˆë‹¤.");
             }
         }
 
@@ -345,7 +345,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                 TimeSpan diff = CurrentDate - datefromDB;
                 int daysDiff = diff.Days;
 
-                CheckDayEatenList.Add((foodname, daysDiff.ToString() + " ÀÏÀü"));
+                CheckDayEatenList.Add((foodname, daysDiff.ToString() + " ì¼ì „"));
             }
             reader.Close();
         }
@@ -525,7 +525,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         dropdown.ClearOptions();
 
         List<string> FilterOption = FoodOptions.FindAll(option => option.ToLower().Contains(inputText));
-        MorningDropDown.options.Insert(0, new TMP_Dropdown.OptionData("À½½ÄÀ» ¼±ÅÃÇØÁÖ¼¼¿ä."));
+        MorningDropDown.options.Insert(0, new TMP_Dropdown.OptionData("ìŒì‹ì„ ì„ íƒí•´ì£¼ì„¸ìš”."));
         MorningDropDown.AddOptions(FilterOption);
     }
     private void UpdateAfterNoonDropDownOptions(TMP_InputField inputField, TMP_Dropdown dropdown)
@@ -534,7 +534,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         dropdown.ClearOptions();
 
         List<string> FilterOption = FoodOptions.FindAll(option => option.ToLower().Contains(inputText));
-        AfterNoonDropDown.options.Insert(0, new TMP_Dropdown.OptionData("À½½ÄÀ» ¼±ÅÃÇØÁÖ¼¼¿ä."));
+        AfterNoonDropDown.options.Insert(0, new TMP_Dropdown.OptionData("ìŒì‹ì„ ì„ íƒí•´ì£¼ì„¸ìš”."));
         AfterNoonDropDown.AddOptions(FilterOption);
     }
     private void UpdateNightDropDownOptions(TMP_InputField inputField, TMP_Dropdown dropdown)
@@ -543,7 +543,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         dropdown.ClearOptions();
 
         List<string> FilterOption = FoodOptions.FindAll(option => option.ToLower().Contains(inputText));
-        NightDropDown.options.Insert(0, new TMP_Dropdown.OptionData("À½½ÄÀ» ¼±ÅÃÇØÁÖ¼¼¿ä."));
+        NightDropDown.options.Insert(0, new TMP_Dropdown.OptionData("ìŒì‹ì„ ì„ íƒí•´ì£¼ì„¸ìš”."));
         NightDropDown.AddOptions(FilterOption);
     }
     private void DropDownFunc(TMP_Dropdown CurrentDropdown)
