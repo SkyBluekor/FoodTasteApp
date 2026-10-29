@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 public class GetSimFoodScore : MonoBehaviour
 {
-    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private string currentID = "";
 
     private List<int> GetSimUserFoodNum = new List<int>();
@@ -26,7 +26,7 @@ public class GetSimFoodScore : MonoBehaviour
     public Button FoodEvaExitBtn;
     public GameObject FoodEvaPanel, FuntionPanel, MoreFoodEvaMessage;
 
-    // MYSQL DB¿¡¼­ ÃëÇâ µ¥ÀÌÅÍ¸¦ °¡Á®¿À´Â ÇÔ¼ö
+    // MYSQL DBì—ì„œ ì·¨í–¥ ë°ì´í„°ë¥¼ ê°€ì ¸ì˜¤ëŠ” í•¨ìˆ˜
    
     // Start is called before the first frame update
     void Start()
@@ -48,13 +48,13 @@ public class GetSimFoodScore : MonoBehaviour
                     SetNameScore(RecArr);
                     for (int i = 0; i < RecArr.Count; i++)
                     {
-                        Debug.Log("ºñ±³ÇÑ ¾ÆÀÌµğ: " + RecArr[i].Item1 + " ÃßÃµ À½½Ä: " + RecArr[i].Item2 + ", ¿¹»ó Á¡¼ö: " + RecArr[i].Item3);
+                        Debug.Log("ë¹„êµí•œ ì•„ì´ë””: " + RecArr[i].Item1 + " ì¶”ì²œ ìŒì‹: " + RecArr[i].Item2 + ", ì˜ˆìƒ ì ìˆ˜: " + RecArr[i].Item3);
                     }
                     SetSimUserPanel(currentID);
                 }
                 else
                 {
-                    Debug.Log("½ÇÆĞ");
+                    Debug.Log("ì‹¤íŒ¨");
                     ShowMoreEvaMessage();
                 }
             }
@@ -72,13 +72,13 @@ public class GetSimFoodScore : MonoBehaviour
                 SetNameScore(RecArr);
                 for (int i = 0; i < RecArr.Count; i++)
                 {
-                    Debug.Log("ºñ±³ÇÑ ¾ÆÀÌµğ: " + RecArr[i].Item1 + " ÃßÃµ À½½Ä: " + RecArr[i].Item2 + ", ¿¹»ó Á¡¼ö: " + RecArr[i].Item3);
+                    Debug.Log("ë¹„êµí•œ ì•„ì´ë””: " + RecArr[i].Item1 + " ì¶”ì²œ ìŒì‹: " + RecArr[i].Item2 + ", ì˜ˆìƒ ì ìˆ˜: " + RecArr[i].Item3);
                 }
                 SetSimUserPanel(currentID);
             }
             else
             {
-                Debug.Log("½ÇÆĞ");
+                Debug.Log("ì‹¤íŒ¨");
                 ShowMoreEvaMessage();
             }
         }
@@ -144,7 +144,7 @@ public class GetSimFoodScore : MonoBehaviour
     {
         if(!UserRatingsDic.ContainsKey(userid))
         {
-            Debug.Log("Æò°¡µ¥ÀÌÅÍ°¡ ºÎÁ·ÇÕ´Ï´Ù. ´õ ¸¹À½ À½½ÄÀ» Æò°¡ÇØÁÖ¼¼¿ä.");
+            Debug.Log("í‰ê°€ë°ì´í„°ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤. ë” ë§ìŒ ìŒì‹ì„ í‰ê°€í•´ì£¼ì„¸ìš”.");
             return false;
         }
 
@@ -152,7 +152,7 @@ public class GetSimFoodScore : MonoBehaviour
 
         if(myFoodcount < minfoodcount)
         {
-            Debug.Log("Æò°¡µ¥ÀÌÅÍ°¡ ºÎÁ·ÇÕ´Ï´Ù. ´õ ¸¹À½ À½½ÄÀ» Æò°¡ÇØÁÖ¼¼¿ä.");
+            Debug.Log("í‰ê°€ë°ì´í„°ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤. ë” ë§ìŒ ìŒì‹ì„ í‰ê°€í•´ì£¼ì„¸ìš”.");
             return false;
         }
 
@@ -174,7 +174,7 @@ public class GetSimFoodScore : MonoBehaviour
             }
         }
 
-        Debug.Log("Æò°¡µ¥ÀÌÅÍ°¡ ºÎÁ·ÇÕ´Ï´Ù. ´õ ¸¹À½ À½½ÄÀ» Æò°¡ÇØÁÖ¼¼¿ä.");
+        Debug.Log("í‰ê°€ë°ì´í„°ê°€ ë¶€ì¡±í•©ë‹ˆë‹¤. ë” ë§ìŒ ìŒì‹ì„ í‰ê°€í•´ì£¼ì„¸ìš”.");
         return false;
     }
 
@@ -239,7 +239,7 @@ public class GetSimFoodScore : MonoBehaviour
                 randomkeys.Add(randomKey);
             }
         }
-        Debug.Log("randomkey °¹¼ö: "+randomkeys.Count);
+        Debug.Log("randomkey ê°¯ìˆ˜: "+randomkeys.Count);
         foreach (var randkey in randomkeys)
         {
             GetHighScoreData.Add(sorteWeightedScores[randkey]);
@@ -259,7 +259,7 @@ public class GetSimFoodScore : MonoBehaviour
             if (kvp.Key != userId)
             {
                 double cosineSim = CalculateCosineSim(UserRatingsDic[userId], kvp.Value, 2);
-                Debug.Log("id " + userId + " ºñ±³id " + kvp.Key + "À¯»çµµ: " + cosineSim);
+                Debug.Log("id " + userId + " ë¹„êµid " + kvp.Key + "ìœ ì‚¬ë„: " + cosineSim);
                 if (cosineSim != 0)
                 {
                     cosineSimDic.Add(kvp.Key, cosineSim);
@@ -283,7 +283,7 @@ public class GetSimFoodScore : MonoBehaviour
         {
             return 0;
         }
-        // °¢ À¯Àú°¡ Æò°¡ÇÑ À½½ÄÀÇ Æò±Õ
+        // ê° ìœ ì €ê°€ í‰ê°€í•œ ìŒì‹ì˜ í‰ê· 
         double avgRatingA = DicA.Values.Average();
         double avgRatingB = DIcB.Values.Average();
 
@@ -291,7 +291,7 @@ public class GetSimFoodScore : MonoBehaviour
         double divisorA = 0;
         double divisorB = 0;
 
-        // Adjusted ÄÚ»çÀÎÀ» ÀÌ¿ëÇØ À¯»çµµ¸¦ °è»ê
+        // Adjusted ì½”ì‚¬ì¸ì„ ì´ìš©í•´ ìœ ì‚¬ë„ë¥¼ ê³„ì‚°
         foreach (KeyValuePair<int, int> kvp in DicA)
         {
             int key = kvp.Key;
@@ -299,24 +299,24 @@ public class GetSimFoodScore : MonoBehaviour
             int RatingB;
             if (DIcB.TryGetValue(key, out RatingB))
             {
-                //µÎ»ç¶÷ÀÌ °°ÀÌ Æò°¡ÇÑ À½½ÄÀÇ ÆòÁ¡¿¡¼­ °¢ À¯ÀúÀÇ Æò°¡Á¡¼öÀÇ Æò±ÕÀ» »©°í ±× °ªµéÀ» °öÇÑ °ªÀ» °è¼ÓÇØ¼­ ´õÇØÁØ´Ù
+                //ë‘ì‚¬ëŒì´ ê°™ì´ í‰ê°€í•œ ìŒì‹ì˜ í‰ì ì—ì„œ ê° ìœ ì €ì˜ í‰ê°€ì ìˆ˜ì˜ í‰ê· ì„ ë¹¼ê³  ê·¸ ê°’ë“¤ì„ ê³±í•œ ê°’ì„ ê³„ì†í•´ì„œ ë”í•´ì¤€ë‹¤
                 double adjRatingA = RatingA - avgRatingA;
                 double adjRatingB = RatingB - avgRatingB;
 
                 dividend += adjRatingA * adjRatingB;
-                // Æò°¡ÇÑ À½½ÄÀÇ ÆòÁ¡À» °¢°¢ÀÇ À¯ÀúÀÇ Æò±Õ°ªÀ¸·Î –A ´ÙÀ½ ±× °ªÀ» Á¦°öÇÏ°í ¸ğµÎ ÇÕÇØÁØ´Ù
+                // í‰ê°€í•œ ìŒì‹ì˜ í‰ì ì„ ê°ê°ì˜ ìœ ì €ì˜ í‰ê· ê°’ìœ¼ë¡œ Â–A ë‹¤ìŒ ê·¸ ê°’ì„ ì œê³±í•˜ê³  ëª¨ë‘ í•©í•´ì¤€ë‹¤
                 divisorA += Math.Pow(adjRatingA, 2);
                 divisorB += Math.Pow(adjRatingB, 2);
             }
         }
-        // À§ÀÇ Á¦°öÇÑ °¢ »ç¿ëÀÚµé·ÎºÎÅÍ °¡Á®¿Â DivisorA,B °ªÀ» ·çÆ®¸¦ ¾º¿î´ÙÀ½ °öÇØÁØ °ªÀ» divideend¸¦ ³ª´©´Âµ¥ »ç¿ëÇÔ.
+        // ìœ„ì˜ ì œê³±í•œ ê° ì‚¬ìš©ìë“¤ë¡œë¶€í„° ê°€ì ¸ì˜¨ DivisorA,B ê°’ì„ ë£¨íŠ¸ë¥¼ ì”Œìš´ë‹¤ìŒ ê³±í•´ì¤€ ê°’ì„ divideendë¥¼ ë‚˜ëˆ„ëŠ”ë° ì‚¬ìš©í•¨.
         double sim = (dividend / (Math.Sqrt(divisorA) * Math.Sqrt(divisorB))+1)/2;
 
         return sim;
     }
 
 
-    //³»°¡ ÁÁ¾ÆÇÒ¸¸ÇÑ À½½ÄÀÇ ÀÌ¸§°ú ¿¹»óÁ¡¼ö¸¦ TextUI·Î Ãâ·Â
+    //ë‚´ê°€ ì¢‹ì•„í• ë§Œí•œ ìŒì‹ì˜ ì´ë¦„ê³¼ ì˜ˆìƒì ìˆ˜ë¥¼ TextUIë¡œ ì¶œë ¥
     private void SetNameScore(List<(string,string,double)> RecArr)
     {
         GameObject Image;
@@ -368,9 +368,9 @@ public class GetSimFoodScore : MonoBehaviour
 
         List<(string, int)> SimUsersFoodData = new List<(string, int)>();
        
-        // ³ª¿Í ºñ±³ÇÏ´Â ´ë»óÀÇ ID¸¦ ±¸ºĞÇÏ´Â index
+        // ë‚˜ì™€ ë¹„êµí•˜ëŠ” ëŒ€ìƒì˜ IDë¥¼ êµ¬ë¶„í•˜ëŠ” index
         int Currentindex = 0;
-        // ³ª¿Í ºñ±³ÇÏ´Â ´ë»óÀÌ ÁÁ¾ÆÇÏ´Â À½½Äµ¥ÀÌÅÍ¸¦ °¡Áø ListÀÇ Index
+        // ë‚˜ì™€ ë¹„êµí•˜ëŠ” ëŒ€ìƒì´ ì¢‹ì•„í•˜ëŠ” ìŒì‹ë°ì´í„°ë¥¼ ê°€ì§„ Listì˜ Index
         int CurrentScoreIndx = 0;
 
         Debug.Log("CosineSimDic.count = " +cosineSimDic.Count);
@@ -384,7 +384,7 @@ public class GetSimFoodScore : MonoBehaviour
 
         }
 
-        //Ã³À½ ½ÃÀÛ½Ã À¯»çµµ°¡ Á¦ÀÏ ³ôÀº »ç¶÷ÀÇ À½½ÄÁ¤º¸ Ãâ·Â
+        //ì²˜ìŒ ì‹œì‘ì‹œ ìœ ì‚¬ë„ê°€ ì œì¼ ë†’ì€ ì‚¬ëŒì˜ ìŒì‹ì •ë³´ ì¶œë ¥
         SimUserIdText.text = CosinSimList[0].Item1;
         SimUserScoreText.text = CosinSimList[0].Item2;
         CompareIdSotredScore = PickRandHighScore(UserRatingsDic[CosinSimList[0].Item1]);
@@ -393,19 +393,19 @@ public class GetSimFoodScore : MonoBehaviour
         foreach(var item in CompareIdSotredScore)
         {
             SimUsersFoodData.Add((item.Key,item.Value));
-            Debug.Log("Á¤·ÄµÈ 9°³ÀÇ À½½Ä ÀÌ¸§: " +item.Key + " Á¡¼ö: " +item.Value);
+            Debug.Log("ì •ë ¬ëœ 9ê°œì˜ ìŒì‹ ì´ë¦„: " +item.Key + " ì ìˆ˜: " +item.Value);
         }
        
         SetSimUserScorePreFabs(CurrentScoreIndx,SimUsersFoodData);
 
 
-        // À§ È­»ìÇ¥ ¹öÆ° Å¬¸¯½Ã ³ª¿Í À¯»çµµ¸¦ °®°í ÇöÀç Ãâ·ÂµÇ´Â À¯»çµµ º¸´Ù ³ôÀº»ç¶÷ÀÇ À½½ÄÁ¤º¸ Ãâ·Â
+        // ìœ„ í™”ì‚´í‘œ ë²„íŠ¼ í´ë¦­ì‹œ ë‚˜ì™€ ìœ ì‚¬ë„ë¥¼ ê°–ê³  í˜„ì¬ ì¶œë ¥ë˜ëŠ” ìœ ì‚¬ë„ ë³´ë‹¤ ë†’ì€ì‚¬ëŒì˜ ìŒì‹ì •ë³´ ì¶œë ¥
         UpButton.onClick.AddListener(() =>
         {
             CurrentScoreIndx = 0;
             CompareIdSotredScore.Clear();
             
-            Debug.Log("ÇöÀç ÀÎµ¦½º: " + Currentindex);
+            Debug.Log("í˜„ì¬ ì¸ë±ìŠ¤: " + Currentindex);
             if (Currentindex == 0)
             {
                 return;
@@ -421,17 +421,17 @@ public class GetSimFoodScore : MonoBehaviour
                 foreach (var item in CompareIdSotredScore)
                 {
                     SimUsersFoodData.Add((item.Key, item.Value));
-                    Debug.Log(CosinSimList[Currentindex].Item1 + "¾ÆÀÌµğ " + "À½½ÄÀÌ¸§: " + item.Key + "À½½ÄÁ¡¼ö: " + item.Value);
+                    Debug.Log(CosinSimList[Currentindex].Item1 + "ì•„ì´ë”” " + "ìŒì‹ì´ë¦„: " + item.Key + "ìŒì‹ì ìˆ˜: " + item.Value);
                 }
                 SetSimUserScorePreFabs(CurrentScoreIndx, SimUsersFoodData);
             } 
         });
-        // ¾Æ·¡¹öÆ° Å¬¸¯½Ã ³ª¿Í À¯»çµµ¸¦ °®Áö¸¸ ÇöÀç Ãâ·ÂµÇ´Â À¯»çµµ º¸´Ù ³·Àº»ç¶÷ÀÇ À½½ÄÁ¤º¸ Ãâ·Â
+        // ì•„ë˜ë²„íŠ¼ í´ë¦­ì‹œ ë‚˜ì™€ ìœ ì‚¬ë„ë¥¼ ê°–ì§€ë§Œ í˜„ì¬ ì¶œë ¥ë˜ëŠ” ìœ ì‚¬ë„ ë³´ë‹¤ ë‚®ì€ì‚¬ëŒì˜ ìŒì‹ì •ë³´ ì¶œë ¥
         DownButton.onClick.AddListener(() =>
         {
             CurrentScoreIndx = 0;
             CompareIdSotredScore.Clear();
-            Debug.Log("ÇöÀç ÀÎµ¦½º: " + Currentindex);
+            Debug.Log("í˜„ì¬ ì¸ë±ìŠ¤: " + Currentindex);
 
             if (Currentindex >= 0 && Currentindex != CosinSimList.Count-1)
             {
@@ -445,7 +445,7 @@ public class GetSimFoodScore : MonoBehaviour
                 foreach( var item in CompareIdSotredScore ) 
                 {
                     SimUsersFoodData.Add((item.Key, item.Value));
-                    Debug.Log(CosinSimList[Currentindex].Item1 + "¾ÆÀÌµğ " + "À½½ÄÀÌ¸§: " +item.Key + "À½½ÄÁ¡¼ö: "+item.Value);
+                    Debug.Log(CosinSimList[Currentindex].Item1 + "ì•„ì´ë”” " + "ìŒì‹ì´ë¦„: " +item.Key + "ìŒì‹ì ìˆ˜: "+item.Value);
                 }
 
                 SetSimUserScorePreFabs(CurrentScoreIndx, SimUsersFoodData);
@@ -458,7 +458,7 @@ public class GetSimFoodScore : MonoBehaviour
 
         LeftButton.onClick.AddListener(() =>
         {
-            Debug.Log("Á¡¼ö ÀÎµ¦½º: " + CurrentScoreIndx);
+            Debug.Log("ì ìˆ˜ ì¸ë±ìŠ¤: " + CurrentScoreIndx);
             if (CurrentScoreIndx == 0)
             {
                 
@@ -477,7 +477,7 @@ public class GetSimFoodScore : MonoBehaviour
 
         RightButton.onClick.AddListener(() =>
         {
-            Debug.Log("Á¡¼ö ÀÎµ¦½º: " + CurrentScoreIndx);
+            Debug.Log("ì ìˆ˜ ì¸ë±ìŠ¤: " + CurrentScoreIndx);
             if (CurrentScoreIndx == 0)
             {
                 CurrentScoreIndx = CurrentScoreIndx +4;
@@ -509,7 +509,7 @@ public class GetSimFoodScore : MonoBehaviour
 
 
     }
-    // Prefab »ı¼º ¸Ş¼­µå
+    // Prefab ìƒì„± ë©”ì„œë“œ
     private void SetSimUserScorePreFabs(int idx , List<(string,int)> values)
     {
         List<(string, int)> FirstItems = new List<(string, int)>();
@@ -587,7 +587,7 @@ public class GetSimFoodScore : MonoBehaviour
             TextMeshProUGUI FoodScore = obj.transform.Find("FoodScore").GetComponent<TextMeshProUGUI> ();
             Image FoodImg = obj.transform.Find("FoodImg").GetComponent<Image>();
 
-            Debug.Log("»çÁø¿¡ ³ª¿Ã Food ¹øÈ£: " + FoodNums[i]);
+            Debug.Log("ì‚¬ì§„ì— ë‚˜ì˜¬ Food ë²ˆí˜¸: " + FoodNums[i]);
             string FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + FoodNums[i] + ".jpg";
             if(File.Exists(FoodImgUrl))
             {
@@ -607,21 +607,21 @@ public class GetSimFoodScore : MonoBehaviour
 
 
             FoodName.text = values[i].Item1.ToString();
-            FoodScore.text = values[i].Item2.ToString() +"Á¡";
+            FoodScore.text = values[i].Item2.ToString() +"ì ";
         }
 
     }
 
 
-    // ³ª¿Í À¯»çÇÑ »ç¶÷ÀÌ Æò°¡ÇÑ À½½ÄÁ¤º¸Áß Á¡¼ö°¡ 4Á¡ ÀÌ»óÀÎ À½½Ä Áß 12°³¸¦ ·£´ıÀ¸·Î »Ì¾Æ Dictionary·Î ¹İÈ¯ÇÏ´Â ¸Ş¼­µå
+    // ë‚˜ì™€ ìœ ì‚¬í•œ ì‚¬ëŒì´ í‰ê°€í•œ ìŒì‹ì •ë³´ì¤‘ ì ìˆ˜ê°€ 4ì  ì´ìƒì¸ ìŒì‹ ì¤‘ 12ê°œë¥¼ ëœë¤ìœ¼ë¡œ ë½‘ì•„ Dictionaryë¡œ ë°˜í™˜í•˜ëŠ” ë©”ì„œë“œ
     private Dictionary<string,int> PickRandHighScore(Dictionary<int,int> SimUserRatingDic)
     {
         GetSimUserFoodNum = new List<int>();
         Dictionary<int,int> ForOrderby = new Dictionary<int,int>();
-        //Æò°¡ÇÑ À¯ÀúÀÇ À½½ÄÁ¡¼ö°¡ 4Á¡ÀÌ»óÀÎ À½½Ä¸¸ ¼±ÅÃ
+        //í‰ê°€í•œ ìœ ì €ì˜ ìŒì‹ì ìˆ˜ê°€ 4ì ì´ìƒì¸ ìŒì‹ë§Œ ì„ íƒ
         List<int> SelectedKeys = SimUserRatingDic.Where(x => x.Value >= 4).Select(x => x.Key).ToList();
         
-        //¸®½ºÆ®¿¡¼­ ·£´ıÀ¸·Î 12°³ÀÇ key °ª ¼±ÅÃ
+        //ë¦¬ìŠ¤íŠ¸ì—ì„œ ëœë¤ìœ¼ë¡œ 12ê°œì˜ key ê°’ ì„ íƒ
         List<int> RanDomKeys = SelectedKeys.OrderBy(x => Guid.NewGuid()).Take(12).ToList();
 
         Dictionary<string, int> ResultDic = new Dictionary<string, int>();
@@ -631,7 +631,7 @@ public class GetSimFoodScore : MonoBehaviour
             ResultDic.Add(FoodNumtoName[key], SimUserRatingDic[key]);
         }
 
-        //ResultDicÀÇ Value °ªÀ» ³»¸²Â÷¼øÀ¸·Î Á¤·ÄÇÏ°í, ±× °á°ú¸¦ ´Ù½Ã Dictionary·Î º¯È¯ÇÏ¿© ResultDic¿¡ ÀúÀå
+        //ResultDicì˜ Value ê°’ì„ ë‚´ë¦¼ì°¨ìˆœìœ¼ë¡œ ì •ë ¬í•˜ê³ , ê·¸ ê²°ê³¼ë¥¼ ë‹¤ì‹œ Dictionaryë¡œ ë³€í™˜í•˜ì—¬ ResultDicì— ì €ì¥
         ResultDic = ResultDic.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
         GetSimUserFoodNum = ForOrderby.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
 
