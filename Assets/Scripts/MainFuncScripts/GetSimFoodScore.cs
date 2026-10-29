@@ -18,6 +18,7 @@ public class GetSimFoodScore : MonoBehaviour
     private Dictionary<int, HashSet<string>> FoodUserDic = new Dictionary<int, HashSet<string>>();
     private Dictionary<string,Dictionary<int,int>> UserRatingsDic = new Dictionary<string,Dictionary<int,int>>();
     private Dictionary<int, string> FoodNumtoName = new Dictionary<int, string>();
+    private Dictionary<string, int> FoodNameToNum = new Dictionary<string, int>(StringComparer.Ordinal);
     private Dictionary<string,double> cosineSimDic = new Dictionary<string,double>();
     public Transform SimUserScoreDataParent;
     public GameObject SimUserFoodsPrefab;
@@ -99,6 +100,7 @@ public class GetSimFoodScore : MonoBehaviour
             UserRatingsDic = new Dictionary<string, Dictionary<int, int>>();
             FoodUserDic = new Dictionary<int, HashSet<string>>();
             FoodNumtoName = new Dictionary<int, string>();
+            FoodNameToNum.Clear();
             while (reader.Read())
             {
                 ID = reader.GetString("id");
@@ -127,6 +129,8 @@ public class GetSimFoodScore : MonoBehaviour
                 SetFoodNumData = reader.GetInt32("foodnum");
                 SetFoodNameData = reader.GetString("foodname");
                 FoodNumtoName.Add(SetFoodNumData, SetFoodNameData);
+                if (!FoodNameToNum.ContainsKey(SetFoodNameData))
+                    FoodNameToNum.Add(SetFoodNameData, SetFoodNumData);
             }
             reader.Close();
 
@@ -347,6 +351,15 @@ public class GetSimFoodScore : MonoBehaviour
 
             PreFoodNameText.text = RecArr[i].Item2;
             preScoreText.text = RecArr[i].Item3.ToString();
+
+            // Every recommended FoodNum is matched to the same numbered photo in FoodImg.
+            // These nine existing rows contain text/rank graphics, but no food thumbnail.
+            int foodNumber;
+            RectTransform row = Image.GetComponent<RectTransform>();
+            if (FoodNameToNum.TryGetValue(RecArr[i].Item2, out foodNumber))
+                FoodImageCatalog.ApplyThumbnail(row, foodNumber, 390f, 92f);
+            else
+                FoodImageCatalog.ApplyThumbnail(row, 0, 390f, 92f);
 
 
         }
@@ -587,23 +600,7 @@ public class GetSimFoodScore : MonoBehaviour
             TextMeshProUGUI FoodScore = obj.transform.Find("FoodScore").GetComponent<TextMeshProUGUI> ();
             Image FoodImg = obj.transform.Find("FoodImg").GetComponent<Image>();
 
-            Debug.Log("사진에 나올 Food 번호: " + FoodNums[i]);
-            string FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + FoodNums[i] + ".jpg";
-            if(File.Exists(FoodImgUrl))
-            {
-                FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + FoodNums[i] + ".jpg";
-            }
-            else
-            {
-                FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + FoodNums[i] + ".png";
-            }
-            byte[] imagedata = System.IO.File.ReadAllBytes(FoodImgUrl);
-
-            Texture2D tex = new Texture2D(2, 2);
-            tex.LoadImage(imagedata);
-
-            Sprite sprite = Sprite.Create(tex,new Rect(0,0,tex.width,tex.height),Vector2.zero);
-            FoodImg.sprite = sprite;
+            FoodImageCatalog.Apply(FoodImg, FoodNums[i]);
 
 
             FoodName.text = values[i].Item1.ToString();
