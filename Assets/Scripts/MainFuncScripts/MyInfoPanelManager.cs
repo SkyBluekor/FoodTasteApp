@@ -13,7 +13,7 @@ public class MyInfoPanelManager : MonoBehaviour
     public TMPro.TextMeshProUGUI MyId, MyNickName, MyAvgScore, MyFoodCount;
     
     private string currentID = "dtdt5486";
-    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
 
     public GameObject FunctionPanel;
     private List<(string,int)> MyFoodDataList;
@@ -121,14 +121,14 @@ public class MyInfoPanelManager : MonoBehaviour
             while (reader.Read()) 
             {
                 MyId.text = currentID;
-                MyFoodCount.text = reader.GetInt32(0).ToString() +" °³";
+                MyFoodCount.text = reader.GetInt32(0).ToString() +" ê°œ";
                 if(!reader.IsDBNull(1))
                 {
-                    MyAvgScore.text = reader.GetDouble(1).ToString() + " Á¡";
+                    MyAvgScore.text = reader.GetDouble(1).ToString() + " ì ";
                 }
                 else
                 {
-                    MyAvgScore.text = "0 Á¡";
+                    MyAvgScore.text = "0 ì ";
                 }
                 //MyNickName.text = reader.GetString(2);
             }
@@ -161,7 +161,7 @@ public class MyInfoPanelManager : MonoBehaviour
         clone.transform.localPosition = new Vector3(0, yvalue - (count * 100), 0);
         TextMeshProUGUI[] texts = clone.GetComponentsInChildren<TextMeshProUGUI>();
         texts[0].text = foodname;
-        texts[1].text = foodscore.ToString() + " Á¡";
+        texts[1].text = foodscore.ToString() + " ì ";
         TMPro.TMP_Dropdown dropdown = clone.GetComponentInChildren<TMP_Dropdown>();
         Button btn = clone.GetComponentInChildren<Button>();
         btn.onClick.AddListener(() =>
@@ -173,15 +173,15 @@ public class MyInfoPanelManager : MonoBehaviour
             foreach(GameObject g  in FoodInfoList)
             {
                 TextMeshProUGUI[] t = g.GetComponentsInChildren<TextMeshProUGUI>();
-                totalscore += int.Parse( t[1].text.Replace("Á¡",""));
+                totalscore += int.Parse( t[1].text.Replace("ì ",""));
             }
-            Debug.Log("ÃÑÁ¡ " + totalscore);
-            Debug.Log("À½½Ä°¹¼ö: " +double.Parse(MyFoodCount.text.Replace("°³", "")));
-            double avg = totalscore / double.Parse(MyFoodCount.text.Replace("°³",""));
+            Debug.Log("ì´ì  " + totalscore);
+            Debug.Log("ìŒì‹ê°¯ìˆ˜: " +double.Parse(MyFoodCount.text.Replace("ê°œ", "")));
+            double avg = totalscore / double.Parse(MyFoodCount.text.Replace("ê°œ",""));
             Debug.Log("avg :" + avg);
             double setavg = Math.Round(avg,2);
             Debug.Log("setavg: " + setavg);
-            MyAvgScore.text = setavg.ToString()+" Á¡";
+            MyAvgScore.text = setavg.ToString()+" ì ";
         });
     }
     
@@ -200,7 +200,7 @@ public class MyInfoPanelManager : MonoBehaviour
                 cmd.Parameters.AddWithValue("@foodname", foodname);
                 cmd.ExecuteNonQuery();
 
-                FoodScoretextMeshProUgui.text = number.ToString() +" Á¡";
+                FoodScoretextMeshProUgui.text = number.ToString() +" ì ";
                 
             }
             catch(MySqlException e)
@@ -299,7 +299,7 @@ public class MyInfoPanelManager : MonoBehaviour
             if (currentpwd != currentpwdCheck) 
             {
                 CurrentPassword.contentType = TMP_InputField.ContentType.Standard;
-                CurrentPassword.text = "µÎ ºñ¹Ğ¹øÈ£°¡ ÀÏÄ¡ÇÏÁö ¾Ê½À´Ï´Ù.";
+                CurrentPassword.text = "ë‘ ë¹„ë°€ë²ˆí˜¸ê°€ ì¼ì¹˜í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤.";
 
                 await Task.Delay(1000);
 
@@ -311,7 +311,7 @@ public class MyInfoPanelManager : MonoBehaviour
             else if (currentpwd != currentIDpwd || currentpwdCheck != currentIDpwd)
             {
                 CurrentPassword.contentType = TMP_InputField.ContentType.Standard;
-                CurrentPassword.text = "ºñ¹Ğ¹øÈ£°¡ Æ²·È½À´Ï´Ù.";
+                CurrentPassword.text = "ë¹„ë°€ë²ˆí˜¸ê°€ í‹€ë ¸ìŠµë‹ˆë‹¤.";
 
                 await Task.Delay(1000);
 
@@ -329,7 +329,7 @@ public class MyInfoPanelManager : MonoBehaviour
                 cmd.ExecuteNonQuery();
 
                 CurrentPassword.contentType = TMP_InputField.ContentType.Standard;
-                CurrentPassword.text = "ºñ¹Ğ¹øÈ£°¡ º¯°æµÇ¾ú½À´Ï´Ù.";
+                CurrentPassword.text = "ë¹„ë°€ë²ˆí˜¸ê°€ ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.";
 
                 await Task.Delay(1000);
 
@@ -373,7 +373,7 @@ public class MyInfoPanelManager : MonoBehaviour
             if(ForCheckPassword != currentIDpwd)
             {
                 NickNamechangePanelPassword.contentType = TMP_InputField.ContentType.Standard;
-                NickNamechangePanelPassword.text = "ºñ¹Ğ¹øÈ£°¡ Æ²·È½À´Ï´Ù.";
+                NickNamechangePanelPassword.text = "ë¹„ë°€ë²ˆí˜¸ê°€ í‹€ë ¸ìŠµë‹ˆë‹¤.";
                 await Task.Delay(1000);
 
                 NickNamechangePanelPassword.contentType = TMP_InputField.ContentType.Password;
@@ -388,7 +388,7 @@ public class MyInfoPanelManager : MonoBehaviour
                 cmd.ExecuteNonQuery();
 
                 NickNamechangePanelPassword.contentType = TMP_InputField.ContentType.Standard;
-                NickNamechangePanelPassword.text = "´Ğ³×ÀÓÀÌ º¯°æµÇ¾ú½À´Ï´Ù. ";
+                NickNamechangePanelPassword.text = "ë‹‰ë„¤ì„ì´ ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤. ";
                 await Task.Delay(1000);
 
                 NickNamechangePanelPassword.contentType = TMP_InputField.ContentType.Password;
@@ -404,7 +404,7 @@ public class MyInfoPanelManager : MonoBehaviour
             Debug.Log(e);
             if (e.Message.Contains("Duplicate entry"))
             {
-                NewNickName.text = "ÀÌ¹Ì Á¸ÀçÇÏ´Â ´Ğ³×ÀÓ ÀÔ´Ï´Ù.";
+                NewNickName.text = "ì´ë¯¸ ì¡´ì¬í•˜ëŠ” ë‹‰ë„¤ì„ ì…ë‹ˆë‹¤.";
                 await Task.Delay(1000);
 
                 NewNickName.text = "";
@@ -457,7 +457,7 @@ public class MyInfoPanelManager : MonoBehaviour
             cmd.ExecuteNonQuery();
 
 
-            DeleteMessage.text = "±×µ¿¾È ÀÌ¿ëÇØÁÖ¼Å¼­ °¨»çÇÕ´Ï´Ù.";
+            DeleteMessage.text = "ê·¸ë™ì•ˆ ì´ìš©í•´ì£¼ì…”ì„œ ê°ì‚¬í•©ë‹ˆë‹¤.";
             ChangePassWordBtn.interactable = false;
             DeletePanelOpenBtn.interactable = false;
             ExitPanelBtn.interactable = false;
