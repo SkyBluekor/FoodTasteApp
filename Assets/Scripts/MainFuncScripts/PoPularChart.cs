@@ -17,6 +17,7 @@ public class PoPularChart : MonoBehaviour
     private List<(string,int)> TodayEatenCount;
     private List<(string, int)> WeekSearchCount;
     private List<(string, int)> WeekEatenCount;
+    private readonly Dictionary<string, int> foodNumberByName = new Dictionary<string, int>();
     private string CurrentTag = "search";
     private string currentSetDay = "total";
 
@@ -151,6 +152,18 @@ public class PoPularChart : MonoBehaviour
             while (reader.Read())
             {
                 WeekEatenCount.Add((reader.GetString(0), reader.GetInt32(1)));
+            }
+            reader.Close();
+
+            // Resolve the current food name to its original FoodNum for photo lookup.
+            foodNumberByName.Clear();
+            cmd = new MySqlCommand("SELECT foodnum,foodname FROM fooddata", conn);
+            reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                string name = reader.GetString(1);
+                if (!foodNumberByName.ContainsKey(name))
+                    foodNumberByName.Add(name, reader.GetInt32(0));
             }
             reader.Close();
 
@@ -334,6 +347,7 @@ public class PoPularChart : MonoBehaviour
                     }
                 
                 }
+                ApplyPopularThumbnail(i, CurrentList[i].Item1);
             }
             else
             {
@@ -386,6 +400,7 @@ public class PoPularChart : MonoBehaviour
                     }
 
                 }
+                ApplyPopularThumbnail(i, CurrentList[i].Item1);
             }
             else
             {
@@ -397,4 +412,16 @@ public class PoPularChart : MonoBehaviour
         }
     }
     
+    private void ApplyPopularThumbnail(int index, string foodName)
+    {
+        int foodNo;
+        string ordinal = index == 0 ? "st" : index == 1 ? "nd" : index == 2 ? "rd" : "th";
+        GameObject row = GameObject.Find("Popular" + (index + 1) + ordinal);
+        if (row == null)
+            return;
+        FoodImageCatalog.ApplyThumbnail(row.GetComponent<RectTransform>(),
+            foodNumberByName.TryGetValue(foodName, out foodNo) ? foodNo : 0,
+            330f, 78f);
+    }
+
 }
