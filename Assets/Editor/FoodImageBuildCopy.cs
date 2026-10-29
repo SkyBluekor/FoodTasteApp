@@ -46,3 +46,4 @@ public static class FoodImageBuildCopy
             " numbered food images to " + destination + " for standalone playback.");
     }
 }
+#endif
