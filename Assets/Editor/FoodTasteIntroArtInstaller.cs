@@ -86,6 +86,8 @@ public static class FoodTasteIntroArtInstaller
         Place(intro, Vector2.zero, new Vector2(1920f, 1080f));
         var title = Find(intro, "Image");
         ReplaceImage(title, sprite[1], true);
+        var legacyTitleText = title.GetComponent<TMP_Text>();
+        if (legacyTitleText != null) legacyTitleText.enabled = false;
         Place(title, new Vector2(0f, 286f), new Vector2(950f, 316f));
 
         SetLabel(Find(intro, "IDText"), sprite[2], new Vector2(-285f, 34f));
@@ -121,6 +123,7 @@ public static class FoodTasteIntroArtInstaller
         if (obj == null) throw new InvalidOperationException("Missing UI Image target");
         Image graphic = obj.GetComponent<Image>();
         if (graphic == null) throw new InvalidOperationException("No UI Image on " + obj.name);
+        graphic.enabled = true; // the original title/label images were disabled
         graphic.sprite = image;
         graphic.type = Image.Type.Simple;
         graphic.preserveAspect = preserveAspect;
