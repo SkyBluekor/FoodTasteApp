@@ -1,0 +1,54 @@
+# Unity generated files
+/Library/
+/Temp/
+/Obj/
+/Build/
+/Builds/
+/Logs/
+/UserSettings/
+/MemoryCaptures/
+/Recordings/
+/Assets/Unity.VisualScripting.Generated/
+/Assets/Unity.VisualScripting.Generated.meta
+
+# IDE and generated project files
+/.vs/
+/.vscode/
+/.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.unityproj
+*.tmp
+UpgradeLog.htm
+
+# Build and package artifacts
+*.apk
+*.aab
+*.unitypackage
+*.app
+sysinfo.txt
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.pem
+*.key
+**/google-services.json
+**/GoogleService-Info.plist
+
+# OS files
+.DS_Store
+Thumbs.db

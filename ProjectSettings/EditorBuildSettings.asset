@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/IntroScene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/MainFuncScene.unity
+    guid: a9fa344433d31d942b1306ddd8c7bd4d
+  - enabled: 1
+    path: Assets/Scenes/RouletteScene.unity
+    guid: d7b2c47e3958a4a4ab43ad065ad76065
+  - enabled: 1
+    path: Assets/Scenes/UP&DownGameScene.unity
+    guid: 605b691c6e49c4f4db7b8b6a6fc0e2f2
+  m_configObjects: {}
