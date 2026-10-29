@@ -16,7 +16,6 @@ public static class FoodImageCatalog
     private static readonly HashSet<int> Missing = new HashSet<int>();
     private static readonly string[] Extensions = { ".jpg", ".jpeg", ".png" };
     private static readonly Dictionary<string, Sprite> CoverSprites = new Dictionary<string, Sprite>();
-    private static readonly Dictionary<int, Sprite> OriginalSlotSprites = new Dictionary<int, Sprite>();
     private static readonly HashSet<int> ReportedMissing = new HashSet<int>();
 
     public static Sprite Get(int foodNumber)
@@ -82,41 +81,49 @@ public static class FoodImageCatalog
     }
 
     /// <summary>
-    /// Fill the original MainFuncScene RankPlaceImg (350 x 100) with a
-    /// CENTER-CROPPED photo. Never create an extra Image beside the slot.
-    /// On missing source photos, restore the row's original artwork instead
-    /// of leaving a stale image from a previously shown food.
+    /// Place a 220x92 food photo INSIDE the existing 350x100 RankPlaceImg slot.
+    /// Preserve the original 1st/2nd/3rd rank artwork rather than replacing it.
+    /// The photo sits on the right, leaving the left rank marker uncovered.
     /// </summary>
     public static bool ApplyToExistingSlot(Image slot, int foodNumber)
     {
         if (slot == null)
             return false;
 
-        int slotId = slot.GetInstanceID();
-        if (!OriginalSlotSprites.ContainsKey(slotId))
-            OriginalSlotSprites.Add(slotId, slot.sprite);
+        RectTransform parent = slot.rectTransform;
+        Transform existing = parent.Find("FoodPhotoInsideSlot");
+        GameObject go;
+        if (existing != null)
+            go = existing.gameObject;
+        else
+        {
+            go = new GameObject("FoodPhotoInsideSlot", typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+        }
+
+        RectTransform photoRect = go.GetComponent<RectTransform>();
+        photoRect.anchorMin = new Vector2(0.5f, 0.5f);
+        photoRect.anchorMax = new Vector2(0.5f, 0.5f);
+        photoRect.pivot = new Vector2(0.5f, 0.5f);
+        photoRect.anchoredPosition = new Vector2(62f, 0f);
+        photoRect.sizeDelta = new Vector2(220f, 92f);
+
+        Image photoImage = go.GetComponent<Image>();
+        photoImage.raycastTarget = false;
+        photoImage.type = Image.Type.Simple;
+        photoImage.preserveAspect = true;
 
         Sprite original = Get(foodNumber);
-        slot.type = Image.Type.Simple;
-        slot.raycastTarget = false;
-        slot.preserveAspect = true;
-
         if (original == null)
         {
-            slot.sprite = OriginalSlotSprites[slotId];
-            slot.color = new Color(0.91f, 0.91f, 0.91f, 1f);
+            photoImage.sprite = null;
+            photoImage.color = Color.clear;
             return false;
         }
 
-        float width = slot.rectTransform.rect.width;
-        float height = slot.rectTransform.rect.height;
-        if (width <= 0f || height <= 0f)
-        {
-            slot.sprite = original;
-            slot.color = Color.white;
-            return true;
-        }
-
+        // Center crop to fill the photo area without distortion or letterboxing.
+        const float width = 220f;
+        const float height = 92f;
         float aspect = width / height;
         string key = foodNumber + "_" + Mathf.RoundToInt(aspect * 100f);
         Sprite cropped;
@@ -125,8 +132,7 @@ public static class FoodImageCatalog
             Texture2D tex = original.texture;
             float cropWidth = tex.width;
             float cropHeight = tex.height;
-            float sourceAspect = cropWidth / cropHeight;
-            if (sourceAspect > aspect)
+            if (cropWidth / cropHeight > aspect)
                 cropWidth = cropHeight * aspect;
             else
                 cropHeight = cropWidth / aspect;
@@ -139,8 +145,9 @@ public static class FoodImageCatalog
             CoverSprites.Add(key, cropped);
         }
 
-        slot.sprite = cropped;
-        slot.color = Color.white;
+        photoImage.sprite = cropped;
+        photoImage.color = Color.white;
+        go.transform.SetAsLastSibling();
         return true;
     }
 
