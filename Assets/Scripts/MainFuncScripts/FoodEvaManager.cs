@@ -64,25 +64,8 @@ public class FoodEvaManager : MonoBehaviour
         }
        
 
-        FoodImgUrl = Application.dataPath+ "/Images/FoodImg/" + randomKey+".jpg";
-        if(File.Exists(FoodImgUrl))
-        {
-            FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".jpg";
-        }
-        else
-        {
-            FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".png";
-        }
-
-        Debug.Log("음식파일이름: " + FoodImgUrl);
-
-        Texture2D Foodtex = LoadTex(FoodImgUrl);
-        if( Foodtex != null)
-        {
-            Sprite sprite = Sprite.Create(Foodtex, new Rect(0, 0, Foodtex.width, Foodtex.height), new Vector2(0.5f, 0.5f));
-            FoodImg.sprite = sprite;
-            FoodText.text = foodData.FoodNumName[randomKey];
-        }
+        FoodImageCatalog.Apply(FoodImg, randomKey);
+        FoodText.text = foodData.FoodNumName[randomKey];
 
         foreach(Button b in StarBtns)
         {
@@ -306,25 +289,8 @@ public class FoodEvaManager : MonoBehaviour
         int randomKeyIndex = UnityEngine.Random.Range(0, keys.Count);
         int randomKey = keys[randomKeyIndex];
 
-        FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".jpg";
-        if (File.Exists(FoodImgUrl))
-        {
-            FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".jpg";
-        }
-        else
-        {
-            FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".png";
-        }
-
-        Debug.Log("음식파일이름: " + FoodImgUrl);
-
-        Texture2D Foodtex = LoadTex(FoodImgUrl);
-        if (Foodtex != null)
-        {
-            Sprite sprite = Sprite.Create(Foodtex, new Rect(0, 0, Foodtex.width, Foodtex.height), new Vector2(0.5f, 0.5f));
-            FoodImg.sprite = sprite;
-            FoodText.text = FoodNumName[randomKey];
-        }
+        FoodImageCatalog.Apply(FoodImg, randomKey);
+        FoodText.text = FoodNumName[randomKey];
 
         Image[] ButtonsImg = new Image[]
         {
