@@ -15,7 +15,9 @@ public static class FoodImageCatalog
     private static readonly Dictionary<int, Sprite> Sprites = new Dictionary<int, Sprite>();
     private static readonly HashSet<int> Missing = new HashSet<int>();
     private static readonly string[] Extensions = { ".jpg", ".jpeg", ".png" };
-    private static bool missingFolderWarned;
+    private static readonly Dictionary<string, Sprite> CoverSprites = new Dictionary<string, Sprite>();
+    private static readonly Dictionary<int, Sprite> OriginalSlotSprites = new Dictionary<int, Sprite>();
+    private static readonly HashSet<int> ReportedMissing = new HashSet<int>();
 
     public static Sprite Get(int foodNumber)
     {
@@ -32,12 +34,10 @@ public static class FoodImageCatalog
         if (filename == null)
         {
             Missing.Add(foodNumber);
-            if (!missingFolderWarned)
-            {
-                missingFolderWarned = true;
-                Debug.LogWarning("[FoodTasteApp] A food image was not found for FoodNum=" + foodNumber +
-                    ". Confirm that Assets/Images/FoodImg contains numbered JPG/PNG photos.");
-            }
+            // Report each missing ID once; a generic warning hid cases like Castella (#68).
+            if (ReportedMissing.Add(foodNumber))
+                Debug.LogWarning("[FoodTasteApp] FoodImg file missing: FoodNum=" + foodNumber +
+                    " (expected " + foodNumber + ".jpg/.jpeg/.png).");
             return null;
         }
 
@@ -79,6 +79,88 @@ public static class FoodImageCatalog
         // Keep an empty placeholder visible; don't leave a photo of another food.
         target.color = sprite != null ? Color.white : new Color(1f, 1f, 1f, 0f);
         return sprite != null;
+    }
+
+    /// <summary>
+    /// Fill the original MainFuncScene RankPlaceImg (350 x 100) with a
+    /// CENTER-CROPPED photo. Never create an extra Image beside the slot.
+    /// On missing source photos, restore the row's original artwork instead
+    /// of leaving a stale image from a previously shown food.
+    /// </summary>
+    public static bool ApplyToExistingSlot(Image slot, int foodNumber)
+    {
+        if (slot == null)
+            return false;
+
+        int slotId = slot.GetInstanceID();
+        if (!OriginalSlotSprites.ContainsKey(slotId))
+            OriginalSlotSprites.Add(slotId, slot.sprite);
+
+        Sprite original = Get(foodNumber);
+        slot.type = Image.Type.Simple;
+        slot.raycastTarget = false;
+        slot.preserveAspect = true;
+
+        if (original == null)
+        {
+            slot.sprite = OriginalSlotSprites[slotId];
+            slot.color = new Color(0.91f, 0.91f, 0.91f, 1f);
+            return false;
+        }
+
+        float width = slot.rectTransform.rect.width;
+        float height = slot.rectTransform.rect.height;
+        if (width <= 0f || height <= 0f)
+        {
+            slot.sprite = original;
+            slot.color = Color.white;
+            return true;
+        }
+
+        float aspect = width / height;
+        string key = foodNumber + "_" + Mathf.RoundToInt(aspect * 100f);
+        Sprite cropped;
+        if (!CoverSprites.TryGetValue(key, out cropped))
+        {
+            Texture2D tex = original.texture;
+            float cropWidth = tex.width;
+            float cropHeight = tex.height;
+            float sourceAspect = cropWidth / cropHeight;
+            if (sourceAspect > aspect)
+                cropWidth = cropHeight * aspect;
+            else
+                cropHeight = cropWidth / aspect;
+
+            Rect region = new Rect((tex.width - cropWidth) * 0.5f,
+                (tex.height - cropHeight) * 0.5f,
+                Mathf.Max(1f, cropWidth), Mathf.Max(1f, cropHeight));
+            cropped = Sprite.Create(tex, region, new Vector2(0.5f, 0.5f));
+            cropped.name = "FoodPhotoCover_" + foodNumber;
+            CoverSprites.Add(key, cropped);
+        }
+
+        slot.sprite = cropped;
+        slot.color = Color.white;
+        return true;
+    }
+
+    /// <summary>
+    /// Clean up incorrectly inserted thumbnail from the old recommendation UI.
+    /// Existing RankPlaceImg is not touched.
+    /// </summary>
+    public static void RemoveLegacyThumbnail(Transform row)
+    {
+        if (row == null)
+            return;
+        Transform old = row.Find("FoodPhotoThumbnail");
+        if (old != null)
+        {
+            old.gameObject.SetActive(false);
+            if (Application.isPlaying)
+                UnityEngine.Object.Destroy(old.gameObject);
+            else
+                UnityEngine.Object.DestroyImmediate(old.gameObject);
+        }
     }
 
     /// <summary>
