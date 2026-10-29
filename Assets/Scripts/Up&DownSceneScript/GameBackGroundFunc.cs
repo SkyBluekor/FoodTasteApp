@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 public class GameBackGroundFunc : MonoBehaviour
 {
-    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private string currentID = "";
     private string currentNickName = "";
     public Button GameStartBtn, RankingBtn, ExitGameBtn, ExitRankingBtn;
@@ -131,7 +131,7 @@ public class GameBackGroundFunc : MonoBehaviour
             foreach (var item in GetScoreData)
             {
                 Rank_List[count].Item1.text = item.Item1;
-                Rank_List[count].Item2.text = item.Item2.ToString() + " Á¡";
+                Rank_List[count].Item2.text = item.Item2.ToString() + " ï¿½ï¿½";
                 count++;
             }
         }
