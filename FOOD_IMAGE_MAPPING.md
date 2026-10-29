@@ -25,3 +25,11 @@ py -3 .\tools\food_images\check_image_coverage.py
 - 사진이 보이지 않으면 Editor Console의 `[FoodTasteApp]` 메시지와 점검 결과를 확인한다.
 
 > GitHub 코드 검토와 참조 확인은 완료했지만 실제 사용자 PC의 Unity 실행 검증은 별도이며, 저장소에 없는 이미지 파일은 코드만으로 복구할 수 없다.
+
+## 추천 목록의 기존 이미지 칸 복구 (2026-10-29)
+- `MainFuncScene.unity`의 추천 9개 행(`1st`~`9th`)에는 원래 `RankPlaceImg` (350×100) 이미지 오브젝트가 있다.
+- 화면에 임의로 생성하던 `FoodPhotoThumbnail`은 더 이상 추천 목록에 생성하지 않고, 기존 오브젝트가 발견되면 제거한다.
+- `RankPlaceImg`에 `FoodNum`과 일치하는 사진을 중앙 크롭해서 표시한다. 기존 음식 이름/점수의 RectTransform 배치는 건드리지 않는다.
+- 원본 XML은 1부터 순서대로 `FoodNum`을 부여한다. `FoodScoreData.xlsx`는 평가/점수용 표이며 이 번호와 사진을 정하는 음식 원본이 아니다.
+- GitHub `FoodImg`에 숫자 파일명이 있는 사진은 625개(1~1265 범위)이며, XML 음식 레코드는 1320개다. 모든 음식 사진이 제공된 것은 아니다.
+- 예: XML의 `카스텔라`는 68번이다. 현재 GitHub에는 `68.jpg`, `68.jpeg`, `68.png`가 없으므로 빈 원본 슬롯 배경으로 표시된다. 실제 사용자 PC의 파일은 별도로 확인해야 한다.
