@@ -18,10 +18,10 @@ public class ForSearching : MonoBehaviour
     [SerializeField]
     private Transform SearchingContent;
     [SerializeField]
-    private int maxSearchResults = 10; // ÃÖ´ë °Ë»ö °á°ú °³¼ö
-    private List<GameObject> searchResultObjects; // °Ë»ö °á°ú °´Ã¼µé
-    private Queue<GameObject> objectPool; // °´Ã¼ Ç®
-    private bool isSearching; // °Ë»ö ÁßÀÎÁö ¿©ºÎ
+    private int maxSearchResults = 10; // ìµœëŒ€ ê²€ìƒ‰ ê²°ê³¼ ê°œìˆ˜
+    private List<GameObject> searchResultObjects; // ê²€ìƒ‰ ê²°ê³¼ ê°ì²´ë“¤
+    private Queue<GameObject> objectPool; // ê°ì²´ í’€
+    private bool isSearching; // ê²€ìƒ‰ ì¤‘ì¸ì§€ ì—¬ë¶€
     public GameObject RelatedSearch;
     // Start is called before the first frame update
     void Start()
@@ -80,7 +80,7 @@ public class ForSearching : MonoBehaviour
                 break;
         }
 
-        yield return null; // ÇÑ ÇÁ·¹ÀÓ ´ë±âÇÏ¿© °Ë»ö °á°ú°¡ È­¸é¿¡ Ç¥½ÃµÇµµ·Ï ÇÔ
+        yield return null; // í•œ í”„ë ˆì„ ëŒ€ê¸°í•˜ì—¬ ê²€ìƒ‰ ê²°ê³¼ê°€ í™”ë©´ì— í‘œì‹œë˜ë„ë¡ í•¨
 
         DisplaySearchResults();
 
@@ -154,7 +154,7 @@ public class ForSearching : MonoBehaviour
 
     private void InitializeDatabase()
     {
-        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";";
+        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
         conn = new MySqlConnection(connStr);
         conn.Open();
 
