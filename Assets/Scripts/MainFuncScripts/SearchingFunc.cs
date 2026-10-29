@@ -11,6 +11,7 @@ public class SearchingFunc : MonoBehaviour
     List<string> FoodNum;
     List<string> FoodName;
     List<string> KmpValue;
+    private readonly Dictionary<string, int> foodNumbersByName = new Dictionary<string, int>();
     [SerializeField]
     private GameObject RelatedPrefab;
     [SerializeField]
@@ -178,6 +179,7 @@ public class SearchingFunc : MonoBehaviour
         MySqlCommand cmd;
         FoodName = new List<string>();
         FoodNum = new List<string>();
+        foodNumbersByName.Clear();
 
         string SelectFoodName = "select foodnum,FoodName from Fooddata";
         int i = 0;
@@ -188,8 +190,12 @@ public class SearchingFunc : MonoBehaviour
             
             while(reader.Read())
             {
-                FoodNum.Add(reader.GetString(0));
-                FoodName.Add(reader.GetString(1));
+                int foodNo = reader.GetInt32(0);
+                string foodName = reader.GetString(1);
+                FoodNum.Add(foodNo.ToString());
+                FoodName.Add(foodName);
+                if (!foodNumbersByName.ContainsKey(foodName))
+                    foodNumbersByName.Add(foodName, foodNo);
                 i++;
             }
             reader.Close();
@@ -207,7 +213,14 @@ public class SearchingFunc : MonoBehaviour
         int yvalue = 50;
 
         clone = Instantiate(RelatedPrefab,new Vector3(0,(yvalue*i),0),Quaternion.identity);
-        clone.GetComponentInChildren<TextMeshProUGUI>().text = FoodName;
+        TextMeshProUGUI label = clone.GetComponentInChildren<TextMeshProUGUI>();
+        label.text = FoodName;
+        int foodNo;
+        if (foodNumbersByName.TryGetValue(FoodName, out foodNo))
+            FoodImageCatalog.ApplyThumbnail(clone.GetComponent<RectTransform>(), foodNo, 7f, 42f);
+        else
+            FoodImageCatalog.ApplyThumbnail(clone.GetComponent<RectTransform>(), 0, 7f, 42f);
+        label.margin = new Vector4(Mathf.Max(label.margin.x, 52f), label.margin.y, label.margin.z, label.margin.w);
         Debug.Log(FoodName);
         clone.transform.SetParent(SearchingContent);
         clone.transform.localScale = Vector3.one;
