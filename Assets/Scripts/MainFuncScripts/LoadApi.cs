@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LoadApi : MonoBehaviour
 {
-    string xmlFileName = "Àü±¹ÅëÇÕ½ÄÇ°¿µ¾ç¼ººĞÁ¤º¸(À½½Ä)Ç¥ÁØµ¥ÀÌÅÍ";
+    string xmlFileName = "ì „êµ­í†µí•©ì‹í’ˆì˜ì–‘ì„±ë¶„ì •ë³´(ìŒì‹)í‘œì¤€ë°ì´í„°";
     void Start()
     {
         LoadXML(xmlFileName);
@@ -21,7 +21,7 @@ public class LoadApi : MonoBehaviour
         Debug.Log(txtAsset.text);
         xmlDoc.LoadXml(txtAsset.text);
 
-        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";";
+        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
         MySqlConnection conn = new MySqlConnection(connStr);
         int FoodNum;
         string Food;
@@ -36,13 +36,13 @@ public class LoadApi : MonoBehaviour
         {
             Debug.Log(i);
             FoodNum = i;
-            Food = node.SelectSingleNode("½ÄÇ°¸í").InnerText;
-            kcal = node.SelectSingleNode("¿¡³ÊÁökcal").InnerText;
-            Foodgram = node.SelectSingleNode("½ÄÇ°Áß·®").InnerText;
+            Food = node.SelectSingleNode("ì‹í’ˆëª…").InnerText;
+            kcal = node.SelectSingleNode("ì—ë„ˆì§€kcal").InnerText;
+            Foodgram = node.SelectSingleNode("ì‹í’ˆì¤‘ëŸ‰").InnerText;
 
-            //Debug.Log("Food : " + node.SelectSingleNode("½ÄÇ°¸í").InnerText);
-            //Debug.Log("Kcal : " + node.SelectSingleNode("¿¡³ÊÁökcal").InnerText);
-            //Debug.Log("½ÄÇ°Áß·® : " + node.SelectSingleNode("½ÄÇ°Áß·®").InnerText);
+            //Debug.Log("Food : " + node.SelectSingleNode("ì‹í’ˆëª…").InnerText);
+            //Debug.Log("Kcal : " + node.SelectSingleNode("ì—ë„ˆì§€kcal").InnerText);
+            //Debug.Log("ì‹í’ˆì¤‘ëŸ‰ : " + node.SelectSingleNode("ì‹í’ˆì¤‘ëŸ‰").InnerText);
 
            /*
             string ModifyFoodTable = "alter table usertastescore add F" + i + " int default 0";
@@ -78,7 +78,7 @@ public class LoadApi : MonoBehaviour
         conn.Close();
 
         /*
-        XmlNodeList Food_Table = xmlDoc.GetElementsByTagName("½ÄÇ°¸í");
+        XmlNodeList Food_Table = xmlDoc.GetElementsByTagName("ì‹í’ˆëª…");
         foreach(XmlNode Food in Food_Table)
         {
             Debug.Log("Food : " + Food.InnerText);
