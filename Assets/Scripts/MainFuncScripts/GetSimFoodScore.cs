@@ -19,6 +19,7 @@ public class GetSimFoodScore : MonoBehaviour
     private Dictionary<string,Dictionary<int,int>> UserRatingsDic = new Dictionary<string,Dictionary<int,int>>();
     private Dictionary<int, string> FoodNumtoName = new Dictionary<int, string>();
     private Dictionary<string, int> FoodNameToNum = new Dictionary<string, int>(StringComparer.Ordinal);
+    private List<int> lastRecommendedFoodNumbers = new List<int>();
     private Dictionary<string,double> cosineSimDic = new Dictionary<string,double>();
     public Transform SimUserScoreDataParent;
     public GameObject SimUserFoodsPrefab;
@@ -191,7 +192,7 @@ public class GetSimFoodScore : MonoBehaviour
     public List<(string, string, double)> GetRecommFoodList(int n)
     {
         (string, double)[] recommarr = new (string, double)[n];
-        List<(string, string, double)> chkarr = new List<(string, string, double)>();
+        List<(int, string, string, double)> chkarr = new List<(int, string, string, double)>();
         List<string> list = new List<string>();
         List<double> PreScoreList = new List<double>();
         List<string> simUsers = GetTopUsers(currentID, 10);
@@ -219,13 +220,13 @@ public class GetSimFoodScore : MonoBehaviour
         {
             string cvtFoodnum = FoodNumtoName[kvp.Key];
             double PreScore = Math.Round(kvp.Value, 2);
-            chkarr.Add((list[i], cvtFoodnum, PreScore));
+            chkarr.Add((kvp.Key, list[i], cvtFoodnum, PreScore));
             i++;
         }
         
-        var sorteWeightedScores = chkarr.OrderByDescending(x => x.Item3).ToList();
+        var sorteWeightedScores = chkarr.OrderByDescending(x => x.Item4).ToList();
 
-        var GetHighScoreData = new List<(string, string, double)>();
+        var GetHighScoreData = new List<(int, string, string, double)>();
 
         foreach (var item in sorteWeightedScores.Take(4))
         {
@@ -249,9 +250,9 @@ public class GetSimFoodScore : MonoBehaviour
             GetHighScoreData.Add(sorteWeightedScores[randkey]);
         }
 
-        GetHighScoreData = GetHighScoreData.OrderByDescending(x => x.Item3).ToList();
-
-        return GetHighScoreData;
+        GetHighScoreData = GetHighScoreData.OrderByDescending(x => x.Item4).ToList();
+        lastRecommendedFoodNumbers = GetHighScoreData.Select(x => x.Item1).ToList();
+        return GetHighScoreData.Select(x => (x.Item2, x.Item3, x.Item4)).ToList();
     }
 
     private List<string> GetTopUsers(string userId, int n)
@@ -354,12 +355,15 @@ public class GetSimFoodScore : MonoBehaviour
 
             // Every recommended FoodNum is matched to the same numbered photo in FoodImg.
             // These nine existing rows contain text/rank graphics, but no food thumbnail.
-            int foodNumber;
+            int foodNumber = i < lastRecommendedFoodNumbers.Count ? lastRecommendedFoodNumbers[i] : 0;
+            if (foodNumber == 0)
+                FoodNameToNum.TryGetValue(RecArr[i].Item2, out foodNumber);
             RectTransform row = Image.GetComponent<RectTransform>();
-            if (FoodNameToNum.TryGetValue(RecArr[i].Item2, out foodNumber))
-                FoodImageCatalog.ApplyThumbnail(row, foodNumber, 390f, 92f);
-            else
-                FoodImageCatalog.ApplyThumbnail(row, 0, 390f, 92f);
+            FoodImageCatalog.ApplyThumbnail(row, foodNumber, 390f, 92f);
+            // Leave a dedicated column for the photo instead of covering food names.
+            RectTransform nameRect = PreFoodNameText.rectTransform;
+            nameRect.anchoredPosition = new Vector2(100f, nameRect.anchoredPosition.y);
+            nameRect.sizeDelta = new Vector2(1100f, nameRect.sizeDelta.y);
 
 
         }
