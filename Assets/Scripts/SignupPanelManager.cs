@@ -33,7 +33,7 @@ public class SignupPanelManager : MonoBehaviour
     private Selectable firstInput;
 
     
-    string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     MySqlConnection conn;
     
     MySqlCommand cmd;
@@ -214,10 +214,10 @@ public class SignupPanelManager : MonoBehaviour
                 cmd = new MySqlCommand(insertQuery, conn);
                 cmd.Parameters.AddWithValue("@image", rawdata);
             }
-            if (FileSize <= 16777215 && NickCheck != 1 && PWD.Equals(PWDCheck) && IDCheck !=1 && Id != "" && PWD != "" && PWDCheck != "" && NickName != "" && DoRegion !="µµ ¼±ÅÃ" && SiguRegion !="±¸ ¼±ÅÃ")
+            if (FileSize <= 16777215 && NickCheck != 1 && PWD.Equals(PWDCheck) && IDCheck !=1 && Id != "" && PWD != "" && PWDCheck != "" && NickName != "" && DoRegion !="ë„ ì„ íƒ" && SiguRegion !="êµ¬ ì„ íƒ")
             {
                 cmd.ExecuteNonQuery();
-                errorstr = "°¡ÀÔÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù.";
+                errorstr = "ê°€ì…ì´ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.";
                 IDInput.text = "";
                 PWDInput.text = "";                
                 PWDCHeckInput.text = "";
@@ -236,39 +236,39 @@ public class SignupPanelManager : MonoBehaviour
             {
                 if (IDCheck == 1)
                 {
-                    errorstr += "ÀÌ¹Ì Á¸ÀçÇÏ´Â ID ÀÔ´Ï´Ù. \n";
+                    errorstr += "ì´ë¯¸ ì¡´ì¬í•˜ëŠ” ID ì…ë‹ˆë‹¤. \n";
                 }
                 if (!PWD.Equals(PWDCheck))
                 {
-                    errorstr += "ºñ¹Ğ¹øÈ£°¡ ÀÏÄ¡ÇÏÁö ¾Ê½À´Ï´Ù. \n";
+                    errorstr += "ë¹„ë°€ë²ˆí˜¸ê°€ ì¼ì¹˜í•˜ì§€ ì•ŠìŠµë‹ˆë‹¤. \n";
                 }
                 if (NickCheck == 1)
                 {
-                    errorstr += "ÀÌ¹Ì Á¸ÀçÇÏ´Â ´Ğ³×ÀÓ ÀÔ´Ï´Ù. \n";
+                    errorstr += "ì´ë¯¸ ì¡´ì¬í•˜ëŠ” ë‹‰ë„¤ì„ ì…ë‹ˆë‹¤. \n";
                 }
                 if (FileSize >= 1677215)
                 {
-                    errorstr = "ÀÌ¹ÌÁö ÆÄÀÏ 16MB ÀÌÇÏ·Î ¼³Á¤ÇØÁÖ¼¼¿ä. \n";
+                    errorstr = "ì´ë¯¸ì§€ íŒŒì¼ 16MB ì´í•˜ë¡œ ì„¤ì •í•´ì£¼ì„¸ìš”. \n";
                 }
                if (Id == "")
                 {
-                    errorstr += "¾ÆÀÌµğ¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä. \n";
+                    errorstr += "ì•„ì´ë””ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”. \n";
                 }
                if(PWD == "")
                 {
-                    errorstr += "ºñ¹Ğ¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä. \n";
+                    errorstr += "ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”. \n";
                 }
                 if (PWDCheck == "")
                 {
-                    errorstr += "ºñ¹Ğ¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä. \n";
+                    errorstr += "ë¹„ë°€ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”. \n";
                 }
                 if (NickName == "")
                 {
-                    errorstr += "´Ğ³×ÀÓÀ» ÀÔ·ÂÇØÁÖ¼¼¿ä. \n";
+                    errorstr += "ë‹‰ë„¤ì„ì„ ì…ë ¥í•´ì£¼ì„¸ìš”. \n";
                 }
-                if(DoRegion == "µµ ¼±ÅÃ" || SiguRegion =="±¸ ¼±ÅÃ")
+                if(DoRegion == "ë„ ì„ íƒ" || SiguRegion =="êµ¬ ì„ íƒ")
                 {
-                    errorstr += "Áö¿ªÀ» ¼±ÅÃÇØÁÖ¼¼¿ä. \n";
+                    errorstr += "ì§€ì—­ì„ ì„ íƒí•´ì£¼ì„¸ìš”. \n";
                 }
             }
             ErrorTxt.SetText(errorstr);
@@ -291,7 +291,7 @@ public class SignupPanelManager : MonoBehaviour
     }
     private void ActConfirmBtn(string errstr)
     {
-        if (errstr.Equals("°¡ÀÔÀÌ ¿Ï·áµÇ¾ú½À´Ï´Ù."))
+        if (errstr.Equals("ê°€ì…ì´ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤."))
         {
             SignConfirmPanel.SetActive(false);
             SignupPanel.SetActive(false);
