@@ -37,7 +37,7 @@ public class IntroManager : MonoBehaviour
         EnterSignupBtn.onClick.AddListener(OnPanel);
         LoginBtn.onClick.AddListener(SigninBtnAction);
 
-        var connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";";
+        var connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
         MySqlConnection conn = new MySqlConnection(connStr);
 
         try
@@ -105,7 +105,7 @@ public class IntroManager : MonoBehaviour
 
     public void SigninBtnAction()
     {
-        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
         MySqlConnection conn = new MySqlConnection(connStr);
         MySqlCommand cmd;
         string Id = IDInputField.text;
@@ -153,7 +153,7 @@ public class IntroManager : MonoBehaviour
             }
             if(IDCheck && PwdCheck)
             {
-                Debug.Log("·Î±×ÀÎ ¼º°ø");
+                Debug.Log("Â·ÃŽÂ±Ã—Ã€ÃŽ Â¼ÂºÂ°Ã¸");
                 SuccessLogin();
                 string playerid = PlayerPrefs.GetString("playerid");
                 SceneManager.LoadScene("MainFuncScene");
