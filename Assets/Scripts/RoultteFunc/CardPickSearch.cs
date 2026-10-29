@@ -361,7 +361,14 @@ public class CardPickSearch : MonoBehaviour
     {
         int yvalue = 50;
         clone = Instantiate(ContentPrefab, new Vector3(0, (yvalue * i), 0), Quaternion.identity);
-        clone.GetComponentInChildren<TextMeshProUGUI>().text = SpawnFoodName;
+        TextMeshProUGUI label = clone.GetComponentInChildren<TextMeshProUGUI>();
+        label.text = SpawnFoodName;
+        int matchedIndex = FoodName.IndexOf(SpawnFoodName);
+        int matchedFoodNum;
+        FoodImageCatalog.ApplyThumbnail(clone.GetComponent<RectTransform>(),
+            matchedIndex >= 0 && int.TryParse(FoodNum[matchedIndex], out matchedFoodNum) ? matchedFoodNum : 0,
+            7f, 42f);
+        label.margin = new Vector4(Mathf.Max(label.margin.x, 52f), label.margin.y, label.margin.z, label.margin.w);
         clone.transform.SetParent(SearchingContent);
         clone.transform.localScale = Vector3.one;
         SetPrefabFunc(clone);
@@ -422,28 +429,7 @@ public class CardPickSearch : MonoBehaviour
     
     private Sprite SetCardImgSprite(int GetFoodnum)
     {
-        string Imagepath = "";
-        string[] imgExtensions = { ".jpg", ".png" };
-        Sprite retSprtie = null;
-        foreach(string ext in imgExtensions) 
-        {
-            Imagepath = "Assets/Images/FoodImg/" + GetFoodnum + ext;
-            if (System.IO.File.Exists(Imagepath))
-                break;
-        }
-        Texture2D tex = null;
-        byte[] fileData;
-        Debug.Log("이미지path " + Imagepath);
-        if(System.IO.File.Exists(Imagepath))
-        {
-            fileData = System.IO.File.ReadAllBytes(Imagepath);
-            tex = new Texture2D(2, 2);
-            tex.LoadImage(fileData);
-        }
-        retSprtie = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),Vector2.zero);
-
-
-        return retSprtie;
+        return FoodImageCatalog.Get(GetFoodnum);
     }
 
     private void RandomPickFunc()
