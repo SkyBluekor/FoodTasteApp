@@ -22,7 +22,7 @@ public class FoodEvaManager : MonoBehaviour
     private TMPro.TextMeshProUGUI FoodText, EvaMent;
     [SerializeField]
     private Button ConfirmBtn, PassBtn , ExitBtn;
-    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";allow user variables=true;";
+    private static string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";allow user variables=true;";
     private MySqlConnection conn = new MySqlConnection(connStr);
     private string id;
     private string FoodImgUrl;
@@ -31,7 +31,7 @@ public class FoodEvaManager : MonoBehaviour
     void Start()
     {
         id = PlayerPrefs.GetString("playerid");
-        Debug.Log("·Î±×ÀÎµÈ ¾ÆÀÌµğ" + id);
+        Debug.Log("ë¡œê·¸ì¸ëœ ì•„ì´ë””" + id);
 
         Button FullExBtn = FullFoodPanel.GetComponentInChildren<Button>();
         FullExBtn.onClick.AddListener(() =>
@@ -60,7 +60,7 @@ public class FoodEvaManager : MonoBehaviour
         
         foreach(int i in foodData.FoodNum)
         {
-            Debug.Log("À½½ÄÀÌ¸§: " + i);
+            Debug.Log("ìŒì‹ì´ë¦„: " + i);
         }
        
 
@@ -74,7 +74,7 @@ public class FoodEvaManager : MonoBehaviour
             FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".png";
         }
 
-        Debug.Log("À½½ÄÆÄÀÏÀÌ¸§: " + FoodImgUrl);
+        Debug.Log("ìŒì‹íŒŒì¼ì´ë¦„: " + FoodImgUrl);
 
         Texture2D Foodtex = LoadTex(FoodImgUrl);
         if( Foodtex != null)
@@ -131,22 +131,22 @@ public class FoodEvaManager : MonoBehaviour
         switch(FullStarCount)
         {
             case 0:
-                EvaMent.text = "ÃÖ¾ÇÀÌ¿¡¿ä.";
+                EvaMent.text = "ìµœì•…ì´ì—ìš”.";
                 break;
             case 1:
-                EvaMent.text = "º°·Î¿¡¿ä.";
+                EvaMent.text = "ë³„ë¡œì—ìš”.";
                 break;
             case 2:
-                EvaMent.text = "±×Àú ±×·¨¾î¿ä.";
+                EvaMent.text = "ê·¸ì € ê·¸ë¬ì–´ìš”.";
                 break;
             case 3:
-                EvaMent.text = "±×³É ±¦ÂúÀº Á¤µµ?";
+                EvaMent.text = "ê·¸ëƒ¥ ê´œì°®ì€ ì •ë„?";
                 break;
             case 4:
-                EvaMent.text = "¸ÀÀÖ¾î¿ä.";
+                EvaMent.text = "ë§›ìˆì–´ìš”.";
                 break;
             case 5:
-                EvaMent.text = "»ï½Ã¼¼³¢ ÀÌ°Í¸¸ ¸Ô°í½Í¾î¿ä.";
+                EvaMent.text = "ì‚¼ì‹œì„¸ë¼ ì´ê²ƒë§Œ ë¨¹ê³ ì‹¶ì–´ìš”.";
                 break;
         }
         
@@ -316,7 +316,7 @@ public class FoodEvaManager : MonoBehaviour
             FoodImgUrl = Application.dataPath + "/Images/FoodImg/" + randomKey + ".png";
         }
 
-        Debug.Log("À½½ÄÆÄÀÏÀÌ¸§: " + FoodImgUrl);
+        Debug.Log("ìŒì‹íŒŒì¼ì´ë¦„: " + FoodImgUrl);
 
         Texture2D Foodtex = LoadTex(FoodImgUrl);
         if (Foodtex != null)
@@ -339,14 +339,14 @@ public class FoodEvaManager : MonoBehaviour
         {
             i.sprite = EmptyStarSprite;
         }
-        EvaMent.text = "À½½Ä Æò°¡ ¸àÆ®";
+        EvaMent.text = "ìŒì‹ í‰ê°€ ë©˜íŠ¸";
 
     }
     /*
     private void ActExitBtn()
     {
         FoodEvaPanel.SetActive(false);
-        Debug.Log("Àç½ÃÀÛ");
+        Debug.Log("ì¬ì‹œì‘");
         FunctionPanel.SetActive(true);
         
     }*/
