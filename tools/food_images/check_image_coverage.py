@@ -22,6 +22,8 @@ def main():
         return 2
     root = ET.parse(XML).getroot()
     records = [e for e in root.iter() if e.tag.rsplit("}", 1)[-1] == "record"]
+    food_names = [next((child.text or "" for child in record
+        if child.tag.rsplit("}", 1)[-1] == "식품명"), "") for record in records]
     ids = {
         int(p.stem) for p in PHOTOS.iterdir()
         if p.is_file()
@@ -37,7 +39,13 @@ def main():
     print("Missing numbered photos:", len(missing))
     print("Photos outside XML numbering:", len(extras))
     if missing:
-        print("First 40 missing IDs:", ", ".join(str(i) for i in missing[:40]))
+        print("First 40 missing photos (FoodNum: FoodName):")
+        for food_num in missing[:40]:
+            print("  %d: %s" % (food_num, food_names[food_num - 1]))
+        print("Missing foods named '카스텔라' / '카스테라':")
+        for i, name in enumerate(food_names, 1):
+            if ("카스텔라" in name or "카스테라" in name) and i in missing:
+                print("  %d: %s" % (i, name))
     print("NOTE: This audits XML numbering, not the live MySQL table.")
     print("      To match displayed food names, Fooddata.FoodNum must correspond")
     print("      to the same numbered images as the original XML import.")
