@@ -204,7 +204,7 @@ public class CardPickSearch : MonoBehaviour
                 }
             }
         }
-        Debug.Log("°Ë»ö: " + Searching);
+        Debug.Log("ê²€ìƒ‰: " + Searching);
 
         KmpValue = new List<string>();
         KmpNumValue = new List<int>();
@@ -316,7 +316,7 @@ public class CardPickSearch : MonoBehaviour
     }
     private void GetFoodName()
     {
-        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + System.Environment.GetEnvironmentVariable("FOODTASTE_DB_PASSWORD") + ";";
+        string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
         MySqlConnection conn = new MySqlConnection(connStr);
         conn.Open();
         MySqlCommand cmd;
@@ -386,17 +386,17 @@ public class CardPickSearch : MonoBehaviour
                 TextMeshProUGUI[] cardtexts = CardSpawnPrefabs[i].GetComponentsInChildren<TextMeshProUGUI>();
                 Image[] CardPrefabsImage = CardSpawnPrefabs[i].GetComponentsInChildren<Image>();
                 int getFoodNum;
-                if(TrayText.text.Equals("À½½Ä ÀÌ¸§"))
+                if(TrayText.text.Equals("ìŒì‹ ì´ë¦„"))
                 {
                     
-                    Debug.Log("Æ®·¹ÀÌ ÀÌ¸§ÀÌ ºñ¾úÀ½");
+                    Debug.Log("íŠ¸ë ˆì´ ì´ë¦„ì´ ë¹„ì—ˆìŒ");
                     spawnedPrefabs[i].GetComponentInChildren<TextMeshProUGUI>().text = SearchingInput.text;
                     //CardSpawnPrefabs[i].GetComponentInChildren<TextMeshProUGUI>().text = SearchingInput.text;
                     cardtexts[0].text = SearchingInput.text;
                     float score = 0.0f;
                     if (FoodScoreDic.TryGetValue(SearchingInput.text, out score))
                     {
-                        cardtexts[1].text = "Æò±Õ Á¡¼ö: " + score.ToString() + "Á¡";
+                        cardtexts[1].text = "í‰ê·  ì ìˆ˜: " + score.ToString() + "ì ";
                     }
 
                     for (int x = 0; x < KmpValue.Count; x++)
@@ -406,7 +406,7 @@ public class CardPickSearch : MonoBehaviour
                             getFoodNum = KmpNumValue[x];
 
                             CardPrefabsImage[1].sprite = SetCardImgSprite(getFoodNum);
-                            // ¾Æ·¡¿¡ À½½ÄÀÇ Æò±Õ Á¡¼ö ±îÁö °í·ÁÇØ Ãß°¡ÇÏ´Â ±â´É ¿ä¸Á
+                            // ì•„ë˜ì— ìŒì‹ì˜ í‰ê·  ì ìˆ˜ ê¹Œì§€ ê³ ë ¤í•´ ì¶”ê°€í•˜ëŠ” ê¸°ëŠ¥ ìš”ë§
                         }
                     }
                     SearchingInput.text = null;
@@ -433,7 +433,7 @@ public class CardPickSearch : MonoBehaviour
         }
         Texture2D tex = null;
         byte[] fileData;
-        Debug.Log("ÀÌ¹ÌÁöpath " + Imagepath);
+        Debug.Log("ì´ë¯¸ì§€path " + Imagepath);
         if(System.IO.File.Exists(Imagepath))
         {
             fileData = System.IO.File.ReadAllBytes(Imagepath);
@@ -453,13 +453,13 @@ public class CardPickSearch : MonoBehaviour
 
         if (currentPrefabCount > 0)
         {
-            if (spawnedPrefabs[currentPrefabCount - 1].GetComponentInChildren<TextMeshProUGUI>().text != "À½½Ä ÀÌ¸§")
+            if (spawnedPrefabs[currentPrefabCount - 1].GetComponentInChildren<TextMeshProUGUI>().text != "ìŒì‹ ì´ë¦„")
             {
                 StartIndex = 0;
             }
             for (int i = 0; i < currentPrefabCount; i++)
             {
-                if (spawnedPrefabs[i].GetComponentInChildren<TextMeshProUGUI>().text == "À½½Ä ÀÌ¸§")
+                if (spawnedPrefabs[i].GetComponentInChildren<TextMeshProUGUI>().text == "ìŒì‹ ì´ë¦„")
                 {
                     StartIndex = i;
                     break;
@@ -468,7 +468,7 @@ public class CardPickSearch : MonoBehaviour
         }
         ItemCount = ItemCount - StartIndex;
         Debug.Log("itemcount " + ItemCount);
-        Debug.Log("ÇÁ¸®ÆÕ°¹¼ö: " + spawnedPrefabs.Length);
+        Debug.Log("í”„ë¦¬íŒ¹ê°¯ìˆ˜: " + spawnedPrefabs.Length);
         int spawnedPreCount = 0;
         foreach(GameObject g in CardSpawnPrefabs)
         {
@@ -477,7 +477,7 @@ public class CardPickSearch : MonoBehaviour
                 spawnedPreCount = spawnedPreCount + 1;
             }
         }
-        Debug.Log("spawnprecount °¹¼ö "+spawnedPreCount);
+        Debug.Log("spawnprecount ê°¯ìˆ˜ "+spawnedPreCount);
 
         if (currentPrefabCount > 0 &&  spawnedPreCount > 1)
         {
@@ -487,7 +487,7 @@ public class CardPickSearch : MonoBehaviour
             {
                 string key = item.Key;
                 string value = item.Value;
-                Debug.Log("·£´ı Å°-°ª: " + key + value);
+                Debug.Log("ëœë¤ í‚¤-ê°’: " + key + value);
                 TextMeshProUGUI TrayText = spawnedPrefabs[StartIndex].GetComponentInChildren<TextMeshProUGUI>();
                 TextMeshProUGUI[] cardtexts = CardSpawnPrefabs[StartIndex].GetComponentsInChildren<TextMeshProUGUI>();
 
@@ -499,7 +499,7 @@ public class CardPickSearch : MonoBehaviour
                 float score = 0.0f;
                 if(FoodScoreDic.TryGetValue(value, out score)) 
                 {
-                    cardtexts[1].text = "Æò±Õ Á¡¼ö: "+ score.ToString() +"Á¡"; 
+                    cardtexts[1].text = "í‰ê·  ì ìˆ˜: "+ score.ToString() +"ì "; 
                 }
                 
                 CardPrefabsImage[1].sprite = SetCardImgSprite(int.Parse(key));
