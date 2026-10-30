@@ -387,7 +387,7 @@ public static class FoodImageCatalog
         photo.anchoredPosition = new Vector2(-960f + width * 0.5f, 0f);
         photo.sizeDelta = new Vector2(width, height);
         photo.localScale = Vector3.one;
-        photo.preserveAspect = false;
+        image.preserveAspect = false;
         image.type = Image.Type.Simple;
         // Center-cropped source sprites can be used when available. A regular
         // 4:3 source also displays correctly once the rect's ratio is adjusted.
