@@ -25,9 +25,18 @@ public static class FoodTasteSignupSceneFix
     private static readonly Color Cream = new Color(1f, .963f, .86f, .96f);
     private static readonly Color Pale = new Color(1f, .916f, .72f, .98f);
 
+    private static bool isApplying;
+
     static FoodTasteSignupSceneFix()
     {
         EditorApplication.delayCall += AutoApply;
+        EditorSceneManager.sceneSaved += AfterSceneSaved;
+    }
+
+    private static void AfterSceneSaved(Scene saved)
+    {
+        if (!isApplying && saved.path == ScenePath)
+            EditorApplication.delayCall += AutoApply;
     }
 
     [MenuItem("Tools/FoodTasteApp/Repair Signup UI")]
@@ -35,6 +44,7 @@ public static class FoodTasteSignupSceneFix
 
     private static void AutoApply()
     {
+        if (isApplying) return;
         if (EditorApplication.isCompiling || EditorApplication.isUpdating ||
             EditorApplication.isPlayingOrWillChangePlaymode)
         {
@@ -52,6 +62,8 @@ public static class FoodTasteSignupSceneFix
 
     private static void Apply(bool automatic)
     {
+        if (isApplying) return;
+        isApplying = true;
         Scene scene = default(Scene);
         bool openedAdditive = false;
         try
@@ -137,8 +149,8 @@ public static class FoodTasteSignupSceneFix
             Position(openArea, -560, 294, 520, 92);
             Image profileArt = Graphic(openArea, builtIn, new Color(1f, .77f, .35f, 1f));
             profileArt.raycastTarget = true;
-            Button openButton = openArea.GetComponent<Button>();
-            if (openButton == null) openButton = openArea.gameObject.AddComponent<Button>();
+            UnityEngine.UI.Button openButton = openArea.GetComponent<UnityEngine.UI.Button>();
+            if (openButton == null) openButton = openArea.gameObject.AddComponent<UnityEngine.UI.Button>();
             openButton.targetGraphic = profileArt;
             Tint(openButton);
             Text(openArea, "Caption", "프로필 이미지 설정", 34, Brown, 0, 0, 495, 80, true);
@@ -171,8 +183,8 @@ public static class FoodTasteSignupSceneFix
             Position(closeRect, 510, 420, 200, 82);
             Image closeArt = Graphic(closeRect, builtIn, new Color(.62f, .29f, .13f, 1f));
             closeArt.raycastTarget = true;
-            Button closeButton = closeRect.GetComponent<Button>();
-            if (closeButton == null) closeButton = closeRect.gameObject.AddComponent<Button>();
+            UnityEngine.UI.Button closeButton = closeRect.GetComponent<UnityEngine.UI.Button>();
+            if (closeButton == null) closeButton = closeRect.gameObject.AddComponent<UnityEngine.UI.Button>();
             closeButton.targetGraphic = closeArt;
             Tint(closeButton);
             Text(closeRect, "Caption", "닫기", 34, Color.white, 0, 0, 180, 72, true);
@@ -202,6 +214,7 @@ public static class FoodTasteSignupSceneFix
         {
             if (openedAdditive && scene.IsValid())
                 EditorSceneManager.CloseScene(scene, true);
+            isApplying = false;
         }
     }
 
@@ -261,6 +274,7 @@ public static class FoodTasteSignupSceneFix
             "Assets/Fonts/GmarketSans Korean SDF.asset");
         if (font != null) label.font = font;
         label.text = value;
+        label.enabled = true;
         label.fontSize = size;
         label.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
         label.color = color;
@@ -277,7 +291,10 @@ public static class FoodTasteSignupSceneFix
         Position((RectTransform)target, x, y, 255, 76);
         foreach (TMP_Text old in target.GetComponents<TMP_Text>())
             old.enabled = false;
-        Graphic((RectTransform)target, rounded, new Color(.98f, .79f, .49f, 1f));
+        RectTransform labelArt = Rect(target, "SignupLabelBackground");
+        Stretch(labelArt);
+        Graphic(labelArt, rounded, new Color(.98f, .79f, .49f, 1f));
+        labelArt.SetAsFirstSibling();
         Text(target, "SignupReadableLabel", caption,
             caption.Length > 5 ? 29 : 34, Brown, 0, 0, 239, 70, true);
     }
@@ -305,14 +322,18 @@ public static class FoodTasteSignupSceneFix
             viewport.offsetMin = new Vector2(24, 7);
             viewport.offsetMax = new Vector2(-22, -7);
         }
+        TMP_FontAsset korean = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+            "Assets/Fonts/GmarketSans Korean SDF.asset");
         if (input.textComponent != null)
         {
+            if (korean != null) input.textComponent.font = korean;
             input.textComponent.fontSize = 31;
             input.textComponent.color = Brown;
         }
         TMP_Text hint = input.placeholder as TMP_Text;
         if (hint != null)
         {
+            if (korean != null) hint.font = korean;
             hint.text = placeholder;
             hint.fontSize = 28;
             hint.color = new Color(.55f, .40f, .28f, .85f);
@@ -330,6 +351,9 @@ public static class FoodTasteSignupSceneFix
         Tint(dropdown);
         if (dropdown.captionText != null)
         {
+            TMP_FontAsset korean = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+                "Assets/Fonts/GmarketSans Korean SDF.asset");
+            if (korean != null) dropdown.captionText.font = korean;
             dropdown.captionText.fontSize = 30;
             dropdown.captionText.color = Brown;
         }
