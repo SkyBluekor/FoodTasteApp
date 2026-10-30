@@ -266,7 +266,7 @@ public static class FoodImageCatalog
         if (label == null || rect == null)
             return;
 
-        float correction = HorizontalCorrection(rect);
+        float correction = HorizontalCorrection(row.GetComponent<RectTransform>());
         // The child looks normal in screen pixels, but occupies the SAME
         // physical bounds as before: scale X and divide local width by X.
         rect.localScale = new Vector3(correction, 1f, 1f);
