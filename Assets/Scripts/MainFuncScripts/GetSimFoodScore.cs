@@ -33,6 +33,7 @@ public class GetSimFoodScore : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        FoodImageCatalog.FitMainPanelTitles();
         currentID = PlayerPrefs.GetString("playerid");
         FoodEvaExitBtn.onClick.AddListener(() => 
         {
