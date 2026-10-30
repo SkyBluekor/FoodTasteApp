@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Shows the EXISTING FoodTasteApp profile file browser on demand.
-/// Does not replace the legacy file selection or image-loading behaviour.
+/// Opens the existing registration profile-image picker without replacing ImageLoader.
+/// Serialized references are assigned by the signup layout tools in the Unity Editor.
 /// </summary>
 public sealed class SignupPhotoBrowserController : MonoBehaviour
 {
@@ -19,6 +19,14 @@ public sealed class SignupPhotoBrowserController : MonoBehaviour
             OpenButton.onClick.AddListener(Open);
         if (CloseButton != null)
             CloseButton.onClick.AddListener(Close);
+    }
+
+    private void OnDestroy()
+    {
+        if (OpenButton != null)
+            OpenButton.onClick.RemoveListener(Open);
+        if (CloseButton != null)
+            CloseButton.onClick.RemoveListener(Close);
     }
 
     public void Open()

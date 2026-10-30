@@ -64,37 +64,47 @@ public class SignupPanelManager : MonoBehaviour
 
     private void Update()
     {
+        // Only handle signup navigation while the signup page is visible.
+        // FindSelectableOnDown() used spatial/auto navigation and sometimes
+        // jumped over PWDCheckInput. Use an explicit, stable field order.
+        if (SignupPanel == null || !SignupPanel.activeInHierarchy)
+            return;
 
-        
         if (PWDInput.isFocused || PWDCHeckInput.isFocused || IDInput.isFocused)
-        {
             Input.imeCompositionMode = IMECompositionMode.Off;
-        }
         else
-        {
             Input.imeCompositionMode = IMECompositionMode.On;
-        }
 
-        if (Input.GetKeyDown(KeyCode.Tab) && Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.Tab))
         {
-            Selectable prev = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnUp();
-            if (prev != null)
+            Selectable[] order = {
+                IDInput, PWDInput, PWDCHeckInput, NickNameInput,
+                TenDigitInput, OneDigitInput, DoRegionInput, SiguRegionInput
+            };
+            GameObject selected = EventSystem.current != null
+                ? EventSystem.current.currentSelectedGameObject : null;
+            Selectable current = selected != null ? selected.GetComponent<Selectable>() : null;
+            int index = Array.IndexOf(order, current);
+            int step = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) ? -1 : 1;
+            int nextIndex = index < 0 ? (step > 0 ? 0 : order.Length - 1)
+                : (index + step + order.Length) % order.Length;
+            if (current is TMP_InputField currentInput)
+                currentInput.DeactivateInputField();
+            Selectable target = order[nextIndex];
+            if (target != null)
             {
-                prev.Select();
+                target.Select();
+                if (target is TMP_InputField input)
+                    input.ActivateInputField();
             }
         }
-        else if (Input.GetKeyDown(KeyCode.Tab))
+        else if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            Selectable next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-            if (next != null)
-            {
-                next.Select();
-            }
-        }
-        else if( Input.GetKeyDown(KeyCode.Return))
-        {
-            SignupBtn.onClick.Invoke();
-            Debug.Log("Button press");
+            // Enter on a dropdown selects its option; it must not submit signup.
+            GameObject selected = EventSystem.current != null
+                ? EventSystem.current.currentSelectedGameObject : null;
+            if (selected == null || selected.GetComponent<TMP_Dropdown>() == null)
+                SignupBtn.onClick.Invoke();
         }
     }
 
