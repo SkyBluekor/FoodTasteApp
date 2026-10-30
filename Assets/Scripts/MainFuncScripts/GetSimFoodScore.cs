@@ -370,10 +370,14 @@ public class GetSimFoodScore : MonoBehaviour
             FoodImageCatalog.RemoveLegacyThumbnail(row);
             Transform originalImage = rowObject.transform.Find("RankPlaceImg");
             if (originalImage != null)
+            {
                 FoodImageCatalog.ApplyToExistingSlot(originalImage.GetComponent<UnityEngine.UI.Image>(), foodNumber);
-            FoodImageCatalog.FitRecommendationRow(row);
+            }
             else
+            {
                 Debug.LogWarning("[FoodTasteApp] Missing RankPlaceImg in recommendation row " + x);
+            }
+            FoodImageCatalog.FitRecommendationRow(row);
 
 
         }
