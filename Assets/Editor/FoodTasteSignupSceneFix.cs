@@ -322,14 +322,18 @@ public static class FoodTasteSignupSceneFix
             viewport.offsetMin = new Vector2(24, 7);
             viewport.offsetMax = new Vector2(-22, -7);
         }
+        TMP_FontAsset korean = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+            "Assets/Fonts/GmarketSans Korean SDF.asset");
         if (input.textComponent != null)
         {
+            if (korean != null) input.textComponent.font = korean;
             input.textComponent.fontSize = 31;
             input.textComponent.color = Brown;
         }
         TMP_Text hint = input.placeholder as TMP_Text;
         if (hint != null)
         {
+            if (korean != null) hint.font = korean;
             hint.text = placeholder;
             hint.fontSize = 28;
             hint.color = new Color(.55f, .40f, .28f, .85f);
@@ -347,6 +351,9 @@ public static class FoodTasteSignupSceneFix
         Tint(dropdown);
         if (dropdown.captionText != null)
         {
+            TMP_FontAsset korean = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(
+                "Assets/Fonts/GmarketSans Korean SDF.asset");
+            if (korean != null) dropdown.captionText.font = korean;
             dropdown.captionText.fontSize = 30;
             dropdown.captionText.color = Brown;
         }
