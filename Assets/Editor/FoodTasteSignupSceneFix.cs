@@ -137,8 +137,8 @@ public static class FoodTasteSignupSceneFix
             Position(openArea, -560, 294, 520, 92);
             Image profileArt = Graphic(openArea, builtIn, new Color(1f, .77f, .35f, 1f));
             profileArt.raycastTarget = true;
-            Button openButton = openArea.GetComponent<Button>();
-            if (openButton == null) openButton = openArea.gameObject.AddComponent<Button>();
+            UnityEngine.UI.Button openButton = openArea.GetComponent<UnityEngine.UI.Button>();
+            if (openButton == null) openButton = openArea.gameObject.AddComponent<UnityEngine.UI.Button>();
             openButton.targetGraphic = profileArt;
             Tint(openButton);
             Text(openArea, "Caption", "프로필 이미지 설정", 34, Brown, 0, 0, 495, 80, true);
@@ -171,8 +171,8 @@ public static class FoodTasteSignupSceneFix
             Position(closeRect, 510, 420, 200, 82);
             Image closeArt = Graphic(closeRect, builtIn, new Color(.62f, .29f, .13f, 1f));
             closeArt.raycastTarget = true;
-            Button closeButton = closeRect.GetComponent<Button>();
-            if (closeButton == null) closeButton = closeRect.gameObject.AddComponent<Button>();
+            UnityEngine.UI.Button closeButton = closeRect.GetComponent<UnityEngine.UI.Button>();
+            if (closeButton == null) closeButton = closeRect.gameObject.AddComponent<UnityEngine.UI.Button>();
             closeButton.targetGraphic = closeArt;
             Tint(closeButton);
             Text(closeRect, "Caption", "닫기", 34, Color.white, 0, 0, 180, 72, true);
@@ -277,7 +277,10 @@ public static class FoodTasteSignupSceneFix
         Position((RectTransform)target, x, y, 255, 76);
         foreach (TMP_Text old in target.GetComponents<TMP_Text>())
             old.enabled = false;
-        Graphic((RectTransform)target, rounded, new Color(.98f, .79f, .49f, 1f));
+        RectTransform labelArt = Rect(target, "SignupLabelBackground");
+        Stretch(labelArt);
+        Graphic(labelArt, rounded, new Color(.98f, .79f, .49f, 1f));
+        labelArt.SetAsFirstSibling();
         Text(target, "SignupReadableLabel", caption,
             caption.Length > 5 ? 29 : 34, Brown, 0, 0, 239, 70, true);
     }
