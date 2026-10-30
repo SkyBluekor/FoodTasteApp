@@ -217,10 +217,10 @@ public class SearchingFunc : MonoBehaviour
         label.text = FoodName;
         int foodNo;
         if (foodNumbersByName.TryGetValue(FoodName, out foodNo))
-            FoodImageCatalog.ApplyThumbnail(clone.GetComponent<RectTransform>(), foodNo, 7f, 42f);
+            FoodImageCatalog.ApplyThumbnail(clone.GetComponent<RectTransform>(), foodNo, 7f, 48f);
         else
             FoodImageCatalog.ApplyThumbnail(clone.GetComponent<RectTransform>(), 0, 7f, 42f);
-        label.margin = new Vector4(Mathf.Max(label.margin.x, 52f), label.margin.y, label.margin.z, label.margin.w);
+        label.margin = new Vector4(Mathf.Max(label.margin.x, 75f), label.margin.y, label.margin.z, label.margin.w);
         Debug.Log(FoodName);
         clone.transform.SetParent(SearchingContent);
         clone.transform.localScale = Vector3.one;
