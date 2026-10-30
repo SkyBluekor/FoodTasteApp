@@ -330,7 +330,22 @@ public static class FoodImageCatalog
         if (row == null)
             return;
         FitRowText(row, "PreFoodNameText", -465f, 665f, 43, 25);
-        FitRowText(row, "PreScoreText", 685f, 950f, 45, 30);
+        FitRowText(row, "PreScoreText", 685f, 950f, 43, 28);
+        FitRowText(row, "PreText", 685f, 950f, 25, 17);
+        Transform caption = row.Find("PreText");
+        if (caption != null)
+        {
+            RectTransform rt = caption.GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, 28f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 39f);
+        }
+        Transform score = row.Find("PreScoreText");
+        if (score != null)
+        {
+            RectTransform rt = score.GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, -22f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 55f);
+        }
     }
 
     public static void FitPopularRow(Transform row)
@@ -350,8 +365,11 @@ public static class FoodImageCatalog
         }
         Transform score = row.Find("PopularScoreText");
         if (score != null)
-            score.GetComponent<RectTransform>().anchoredPosition =
-                new Vector2(score.GetComponent<RectTransform>().anchoredPosition.x, -24f);
+        {
+            RectTransform rt = score.GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, -22f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 55f);
+        }
     }
 
     public static void FitSimilarUserRow(Image image, TMPro.TextMeshProUGUI name,
