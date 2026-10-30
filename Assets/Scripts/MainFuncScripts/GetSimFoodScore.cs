@@ -370,6 +370,7 @@ public class GetSimFoodScore : MonoBehaviour
             Transform originalImage = rowObject.transform.Find("RankPlaceImg");
             if (originalImage != null)
                 FoodImageCatalog.ApplyToExistingSlot(originalImage.GetComponent<UnityEngine.UI.Image>(), foodNumber);
+            FoodImageCatalog.FitRecommendationRow(row);
             else
                 Debug.LogWarning("[FoodTasteApp] Missing RankPlaceImg in recommendation row " + x);
 
@@ -613,7 +614,7 @@ public class GetSimFoodScore : MonoBehaviour
             Image FoodImg = obj.transform.Find("FoodImg").GetComponent<Image>();
 
             FoodImageCatalog.Apply(FoodImg, FoodNums[i]);
-
+            FoodImageCatalog.FitSimilarUserRow(FoodImg, FoodName, FoodScore);
 
             FoodName.text = values[i].Item1.ToString();
             FoodScore.text = values[i].Item2.ToString() +"점";
