@@ -167,9 +167,9 @@ public static class FoodImageCatalog
     }
 
     /// <summary>
-    /// Place a 220x92 food photo INSIDE the existing 350x100 RankPlaceImg slot.
-    /// Preserve the original 1st/2nd/3rd rank artwork rather than replacing it.
-    /// The photo sits on the right, leaving the left rank marker uncovered.
+    /// The legacy three-column canvas scales X (0.2) and Y (0.78) differently.
+    /// Fit a true 4:3 food image inside the EXISTING rank/photo area in screen
+    /// space without moving the rows, changing the parent's scale or hiding text.
     /// </summary>
     public static bool ApplyToExistingSlot(Image slot, int foodNumber)
     {
@@ -187,62 +187,154 @@ public static class FoodImageCatalog
             go.transform.SetParent(parent, false);
         }
 
+        go.SetActive(true);
+        float ratio = HorizontalCorrection(parent);
+        const float imageHeight = 90f;
+        float imageWidth = Mathf.Min(470f, imageHeight * (4f / 3f) * ratio);
+
         RectTransform photoRect = go.GetComponent<RectTransform>();
         photoRect.anchorMin = new Vector2(0.5f, 0.5f);
         photoRect.anchorMax = new Vector2(0.5f, 0.5f);
         photoRect.pivot = new Vector2(0.5f, 0.5f);
-        photoRect.anchoredPosition = new Vector2(62f, 0f);
-        photoRect.sizeDelta = new Vector2(220f, 92f);
+        // Align its LEFT edge with the existing RankPlaceImg left edge.
+        photoRect.anchoredPosition = new Vector2((imageWidth - parent.rect.width) * 0.5f, 0f);
+        photoRect.sizeDelta = new Vector2(imageWidth, imageHeight);
+        photoRect.localScale = Vector3.one;
 
-        Image photoImage = go.GetComponent<Image>();
-        photoImage.raycastTarget = false;
-        photoImage.type = Image.Type.Simple;
-        photoImage.preserveAspect = true;
-
-        Sprite original = Get(foodNumber);
-        if (original == null)
+        Image photo = go.GetComponent<Image>();
+        photo.type = Image.Type.Simple;
+        photo.raycastTarget = false;
+        // PreserveAspect=true makes a 4:3 source extremely skinny on this
+        // non-uniformly scaled canvas. Cover is instead calculated in pixels.
+        photo.preserveAspect = false;
+        Sprite source = Get(foodNumber);
+        if (source == null)
         {
-            photoImage.sprite = null;
-            photoImage.color = Color.clear;
-            return false;
-        }
-        if (original == fallbackSprite)
-        {
-            // Fallback needs the whole plate icon; do not center-crop it.
-            photoImage.sprite = original;
-            photoImage.color = Color.white;
-            go.transform.SetAsLastSibling();
+            photo.sprite = null;
+            photo.color = Color.clear;
             return false;
         }
 
-        // Center crop to fill the photo area without distortion or letterboxing.
-        const float width = 220f;
-        const float height = 92f;
-        float aspect = width / height;
-        string key = foodNumber + "_" + Mathf.RoundToInt(aspect * 100f);
-        Sprite cropped;
-        if (!CoverSprites.TryGetValue(key, out cropped))
+        if (source == fallbackSprite)
+            photo.sprite = source; // Never crop the missing-photo icon.
+        else
         {
-            Texture2D tex = original.texture;
-            float cropWidth = tex.width;
-            float cropHeight = tex.height;
-            if (cropWidth / cropHeight > aspect)
-                cropWidth = cropHeight * aspect;
-            else
-                cropHeight = cropWidth / aspect;
-
-            Rect region = new Rect((tex.width - cropWidth) * 0.5f,
-                (tex.height - cropHeight) * 0.5f,
-                Mathf.Max(1f, cropWidth), Mathf.Max(1f, cropHeight));
-            cropped = Sprite.Create(tex, region, new Vector2(0.5f, 0.5f));
-            cropped.name = "FoodPhotoCover_" + foodNumber;
-            CoverSprites.Add(key, cropped);
+            // Center crop source to 4:3 BEFORE the panel's scale correction.
+            string key = foodNumber + "_four_by_three";
+            Sprite cropped;
+            if (!CoverSprites.TryGetValue(key, out cropped))
+            {
+                Texture2D texture = source.texture;
+                float width = texture.width;
+                float height = texture.height;
+                const float aspect = 4f / 3f;
+                if (width / height > aspect)
+                    width = height * aspect;
+                else
+                    height = width / aspect;
+                cropped = Sprite.Create(texture,
+                    new Rect((texture.width - width) * 0.5f,
+                        (texture.height - height) * 0.5f, width, height),
+                    new Vector2(0.5f, 0.5f));
+                cropped.name = "FoodPhotoScreenCorrected_" + foodNumber;
+                CoverSprites[key] = cropped;
+            }
+            photo.sprite = cropped;
         }
 
-        photoImage.sprite = cropped;
-        photoImage.color = Color.white;
+        photo.color = Color.white;
         go.transform.SetAsLastSibling();
-        return true;
+        return source != fallbackSprite;
+    }
+
+    /// <summary>Compensate for the legacy UI's nonuniform parent scales.</summary>
+    private static float HorizontalCorrection(RectTransform item)
+    {
+        float x = Mathf.Abs(item.lossyScale.x);
+        float y = Mathf.Abs(item.lossyScale.y);
+        return x > 0.0001f ? Mathf.Clamp(y / x, 0.5f, 8f) : 1f;
+    }
+
+    private static void FitRowText(Transform row, string childName,
+        float left, float right, int fontMax, int fontMin)
+    {
+        Transform child = row.Find(childName);
+        if (child == null)
+            return;
+        TMPro.TextMeshProUGUI label = child.GetComponent<TMPro.TextMeshProUGUI>();
+        RectTransform rect = child.GetComponent<RectTransform>();
+        if (label == null || rect == null)
+            return;
+
+        float correction = HorizontalCorrection(rect);
+        // The child looks normal in screen pixels, but occupies the SAME
+        // physical bounds as before: scale X and divide local width by X.
+        rect.localScale = new Vector3(correction, 1f, 1f);
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = new Vector2((left + right) * 0.5f, 0f);
+        rect.sizeDelta = new Vector2((right - left) / correction, 98f);
+        label.enableWordWrapping = true;
+        label.enableAutoSizing = true;
+        label.fontSizeMin = fontMin;
+        label.fontSizeMax = fontMax;
+        label.fontSize = fontMax;
+        label.alignment = TMPro.TextAlignmentOptions.Center;
+        label.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+    }
+
+    public static void FitRecommendationRow(Transform row)
+    {
+        if (row == null)
+            return;
+        FitRowText(row, "PreFoodNameText", -465f, 665f, 43, 25);
+        FitRowText(row, "PreScoreText", 685f, 950f, 45, 30);
+    }
+
+    public static void FitPopularRow(Transform row)
+    {
+        if (row == null)
+            return;
+        FitRowText(row, "PopularFoodNameText", -695f, 825f, 43, 25);
+        FitRowText(row, "PopularScoreText", 850f, 1190f, 42, 24);
+        // The small "search count" caption stays in its own column.
+        FitRowText(row, "PopularText", 850f, 1190f, 28, 19);
+        Transform caption = row.Find("PopularText");
+        if (caption != null)
+        {
+            RectTransform rt = caption.GetComponent<RectTransform>();
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, 27f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 42f);
+        }
+        Transform score = row.Find("PopularScoreText");
+        if (score != null)
+            score.GetComponent<RectTransform>().anchoredPosition =
+                new Vector2(score.GetComponent<RectTransform>().anchoredPosition.x, -24f);
+    }
+
+    public static void FitSimilarUserRow(Image image, TMPro.TextMeshProUGUI name,
+        TMPro.TextMeshProUGUI score)
+    {
+        if (image == null)
+            return;
+        RectTransform photo = image.rectTransform;
+        float correction = HorizontalCorrection(photo);
+        const float height = 132f;
+        float width = Mathf.Min(730f, height * (4f / 3f) * correction);
+        photo.anchorMin = new Vector2(0.5f, 0.5f);
+        photo.anchorMax = new Vector2(0.5f, 0.5f);
+        photo.pivot = new Vector2(0.5f, 0.5f);
+        photo.anchoredPosition = new Vector2(-960f + width * 0.5f, 0f);
+        photo.sizeDelta = new Vector2(width, height);
+        photo.localScale = Vector3.one;
+        photo.preserveAspect = false;
+        // Center-cropped source sprites can be used when available. A regular
+        // 4:3 source also displays correctly once the rect's ratio is adjusted.
+        if (name != null)
+            FitRowText(name.transform.parent, name.name, -265f, 580f, 45, 27);
+        if (score != null)
+            FitRowText(score.transform.parent, score.name, 605f, 955f, 44, 25);
     }
 
     /// <summary>
@@ -273,28 +365,29 @@ public static class FoodImageCatalog
     {
         if (row == null)
             return;
-
         Transform existing = row.Find("FoodPhotoThumbnail");
-        GameObject go;
-        if (existing != null)
-            go = existing.gameObject;
-        else
-        {
-            go = new GameObject("FoodPhotoThumbnail", typeof(RectTransform), typeof(Image));
+        GameObject go = existing != null ? existing.gameObject :
+            new GameObject("FoodPhotoThumbnail", typeof(RectTransform), typeof(Image));
+        if (existing == null)
             go.transform.SetParent(row, false);
-        }
+        go.SetActive(true);
 
-        var rect = go.GetComponent<RectTransform>();
+        RectTransform rect = go.GetComponent<RectTransform>();
+        float correction = HorizontalCorrection(row);
+        float height = Mathf.Min(size, Mathf.Max(1f, row.rect.height - 5f));
+        float width = height * (4f / 3f) * correction;
         rect.anchorMin = new Vector2(0f, 0.5f);
         rect.anchorMax = new Vector2(0f, 0.5f);
         rect.pivot = new Vector2(0f, 0.5f);
         rect.anchoredPosition = new Vector2(leftPadding, 0f);
-        rect.sizeDelta = new Vector2(size, size);
+        rect.sizeDelta = new Vector2(width, height);
+        rect.localScale = Vector3.one;
 
-        var graphic = go.GetComponent<Image>();
+        Image graphic = go.GetComponent<Image>();
         graphic.raycastTarget = false;
+        graphic.type = Image.Type.Simple;
         Apply(graphic, foodNumber);
-        // Thumbnail should not hide existing buttons or text.
+        graphic.preserveAspect = false; // Rect has screen-correct 4:3 proportions.
         go.transform.SetAsFirstSibling();
     }
 
