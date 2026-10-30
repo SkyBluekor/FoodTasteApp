@@ -25,9 +25,18 @@ public static class FoodTasteSignupSceneFix
     private static readonly Color Cream = new Color(1f, .963f, .86f, .96f);
     private static readonly Color Pale = new Color(1f, .916f, .72f, .98f);
 
+    private static bool isApplying;
+
     static FoodTasteSignupSceneFix()
     {
         EditorApplication.delayCall += AutoApply;
+        EditorSceneManager.sceneSaved += AfterSceneSaved;
+    }
+
+    private static void AfterSceneSaved(Scene saved)
+    {
+        if (!isApplying && saved.path == ScenePath)
+            EditorApplication.delayCall += AutoApply;
     }
 
     [MenuItem("Tools/FoodTasteApp/Repair Signup UI")]
@@ -35,6 +44,7 @@ public static class FoodTasteSignupSceneFix
 
     private static void AutoApply()
     {
+        if (isApplying) return;
         if (EditorApplication.isCompiling || EditorApplication.isUpdating ||
             EditorApplication.isPlayingOrWillChangePlaymode)
         {
@@ -52,6 +62,8 @@ public static class FoodTasteSignupSceneFix
 
     private static void Apply(bool automatic)
     {
+        if (isApplying) return;
+        isApplying = true;
         Scene scene = default(Scene);
         bool openedAdditive = false;
         try
@@ -202,6 +214,7 @@ public static class FoodTasteSignupSceneFix
         {
             if (openedAdditive && scene.IsValid())
                 EditorSceneManager.CloseScene(scene, true);
+            isApplying = false;
         }
     }
 
@@ -261,6 +274,7 @@ public static class FoodTasteSignupSceneFix
             "Assets/Fonts/GmarketSans Korean SDF.asset");
         if (font != null) label.font = font;
         label.text = value;
+        label.enabled = true;
         label.fontSize = size;
         label.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
         label.color = color;
