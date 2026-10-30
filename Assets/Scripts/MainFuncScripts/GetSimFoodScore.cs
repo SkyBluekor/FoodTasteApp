@@ -271,7 +271,7 @@ public class GetSimFoodScore : MonoBehaviour
                 }
             }
         }
-        var sortedCosineSim = cosineSimDic.OrderByDescending(x => x.Key);
+        var sortedCosineSim = cosineSimDic.OrderByDescending(x => x.Value);
         foreach (var item in sortedCosineSim.Take(n))
         {
             UserList.Add(item.Key);
