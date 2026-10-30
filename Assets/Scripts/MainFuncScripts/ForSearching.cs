@@ -220,10 +220,10 @@ public class ForSearching : MonoBehaviour
             label.text = kmp;
             int foodNo;
             if (foodNumbersByName.TryGetValue(kmp, out foodNo))
-                FoodImageCatalog.ApplyThumbnail(resultObject.GetComponent<RectTransform>(), foodNo, 7f, 42f);
+                FoodImageCatalog.ApplyThumbnail(resultObject.GetComponent<RectTransform>(), foodNo, 7f, 48f);
             else
                 FoodImageCatalog.ApplyThumbnail(resultObject.GetComponent<RectTransform>(), 0, 7f, 42f);
-            label.margin = new Vector4(Mathf.Max(label.margin.x, 52f), label.margin.y, label.margin.z, label.margin.w);
+            label.margin = new Vector4(Mathf.Max(label.margin.x, 75f), label.margin.y, label.margin.z, label.margin.w);
             resultObject.transform.SetParent(SearchingContent, false);
             resultObject.SetActive(true);
             RelatedSearch.SetActive(true);
