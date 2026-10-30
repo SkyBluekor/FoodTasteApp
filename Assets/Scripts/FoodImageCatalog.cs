@@ -284,6 +284,47 @@ public static class FoodImageCatalog
         label.overflowMode = TMPro.TextOverflowModes.Ellipsis;
     }
 
+    /// <summary>
+    /// Top panel titles used a very large font in a 50-unit-high box.
+    /// They became vertically clipped when the panels were scaled 0.2x/0.78y.
+    /// Fit their text within the existing title strip, without touching buttons.
+    /// </summary>
+    public static void FitMainPanelTitles()
+    {
+        GameObject function = GameObject.Find("FunctionPanel");
+        if (function == null)
+            return;
+        Transform root = function.transform;
+        FitPanelTitle(root.Find("GetPreFoodPanel/PanelBackGroundImg/Text (TMP)"));
+        FitPanelTitle(root.Find("GetSimUserHighFoodPanel/PanelBackGrounImg/Text (TMP)"));
+        FitPanelTitle(root.Find("PoPularFoodPanel/PanelBackGroundImg/Text (TMP)"));
+    }
+
+    private static void FitPanelTitle(Transform title)
+    {
+        if (title == null)
+            return;
+        RectTransform rect = title.GetComponent<RectTransform>();
+        TMPro.TextMeshProUGUI label = title.GetComponent<TMPro.TextMeshProUGUI>();
+        if (rect == null || label == null)
+            return;
+        RectTransform parent = rect.parent as RectTransform;
+        float correction = parent != null ? HorizontalCorrection(parent) : 1f;
+        rect.localScale = new Vector3(correction, 1f, 1f);
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = new Vector2(0f, 488f);
+        rect.sizeDelta = new Vector2(1790f / correction, 97f);
+        label.enableWordWrapping = true;
+        label.enableAutoSizing = true;
+        label.fontSizeMin = 22f;
+        label.fontSizeMax = 42f;
+        label.fontSize = 42f;
+        label.alignment = TMPro.TextAlignmentOptions.Center;
+        label.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+    }
+
     public static void FitRecommendationRow(Transform row)
     {
         if (row == null)
@@ -329,6 +370,7 @@ public static class FoodImageCatalog
         photo.sizeDelta = new Vector2(width, height);
         photo.localScale = Vector3.one;
         photo.preserveAspect = false;
+        image.type = Image.Type.Simple;
         // Center-cropped source sprites can be used when available. A regular
         // 4:3 source also displays correctly once the rect's ratio is adjusted.
         if (name != null)
