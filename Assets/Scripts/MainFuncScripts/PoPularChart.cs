@@ -23,6 +23,7 @@ public class PoPularChart : MonoBehaviour
 
     void Start()
     {
+        FoodImageCatalog.FitMainPanelTitles();
         if(PanelCheck.activeInHierarchy) 
         {
             GetPoPularData();
