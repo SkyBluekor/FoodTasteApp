@@ -202,9 +202,9 @@ public static class FoodTasteSignupArtInstaller
             closeText.alignment = TextAlignmentOptions.Center;
             closeText.raycastTarget = false;
 
-            SignupPhotoBrowserController controller = signup.GetComponent<SignupPhotoBrowserController>();
+            FoodTasteSignupPickerBridge controller = signup.GetComponent<FoodTasteSignupPickerBridge>();
             if (controller == null)
-                controller = signup.gameObject.AddComponent<SignupPhotoBrowserController>();
+                controller = signup.gameObject.AddComponent<FoodTasteSignupPickerBridge>();
             controller.Browser = browser.gameObject;
             controller.OpenButton = profileButton;
             controller.CloseButton = close;
