@@ -189,9 +189,9 @@ public static class FoodTasteSignupSceneFix
             Tint(closeButton);
             Text(closeRect, "Caption", "닫기", 34, Color.white, 0, 0, 180, 72, true);
 
-            SignupPhotoBrowserController controller = signup.GetComponent<SignupPhotoBrowserController>();
+            FoodTasteSignupPickerBridge controller = signup.GetComponent<FoodTasteSignupPickerBridge>();
             if (controller == null)
-                controller = signup.gameObject.AddComponent<SignupPhotoBrowserController>();
+                controller = signup.gameObject.AddComponent<FoodTasteSignupPickerBridge>();
             controller.Browser = browser.gameObject;
             controller.OpenButton = openButton;
             controller.CloseButton = closeButton;
