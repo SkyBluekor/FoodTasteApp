@@ -17,6 +17,85 @@ public static class FoodImageCatalog
     private static readonly string[] Extensions = { ".jpg", ".jpeg", ".png" };
     private static readonly Dictionary<string, Sprite> CoverSprites = new Dictionary<string, Sprite>();
     private static readonly HashSet<int> ReportedMissing = new HashSet<int>();
+    private static readonly Dictionary<int, int> RepresentativeMap = new Dictionary<int, int>();
+    private static bool mappingLoaded;
+    private static bool fallbackAttempted;
+    private static Sprite fallbackSprite;
+
+    // Unity embeds Assets/Resources/FoodImageMapping.csv in both Editor and builds.
+    private static void EnsureMappingLoaded()
+    {
+        if (mappingLoaded)
+            return;
+        mappingLoaded = true;
+        TextAsset asset = Resources.Load<TextAsset>("FoodImageMapping");
+        if (asset == null)
+        {
+            Debug.LogWarning("[FoodTasteApp] FoodImageMapping.csv missing from Resources; photos will use exact IDs.");
+            return;
+        }
+
+        using (var reader = new StringReader(asset.text))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("FoodNum", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string[] fields = line.TrimStart('\uFEFF').Split(',');
+                int source, target;
+                if (fields.Length >= 2 &&
+                    int.TryParse(fields[0].Trim(), out source) &&
+                    int.TryParse(fields[1].Trim(), out target) &&
+                    source > 0 && target > 0)
+                    RepresentativeMap[source] = target;
+            }
+        }
+    }
+
+    private static Sprite GetFallback()
+    {
+        if (fallbackAttempted)
+            return fallbackSprite;
+        fallbackAttempted = true;
+        string filename = FindNonNumberedImage("FoodImageFallback.png");
+        if (filename == null)
+            return null;
+        try
+        {
+            var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (!ImageConversion.LoadImage(texture, File.ReadAllBytes(filename), false))
+            {
+                UnityEngine.Object.Destroy(texture);
+                return null;
+            }
+            texture.name = "FoodImageFallback";
+            fallbackSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[FoodTasteApp] Could not load fallback image: " + ex.Message);
+        }
+        return fallbackSprite;
+    }
+
+    private static string FindNonNumberedImage(string filename)
+    {
+        string[] dirs = {
+            Path.Combine(Application.dataPath, "Images", "FoodImg"),
+            Path.Combine(Application.streamingAssetsPath, "FoodImg"),
+            Path.Combine(Path.GetDirectoryName(Application.dataPath) ?? "", "FoodImg")
+        };
+        foreach (var dir in dirs)
+        {
+            string file = Path.Combine(dir, filename);
+            if (File.Exists(file))
+                return file;
+        }
+        return null;
+    }
 
     public static Sprite Get(int foodNumber)
     {
@@ -27,17 +106,24 @@ public static class FoodImageCatalog
         if (Sprites.TryGetValue(foodNumber, out cached))
             return cached;
         if (Missing.Contains(foodNumber))
-            return null;
+            return GetFallback();
 
+        // Direct FoodNum files always take priority over any representative mapping.
         string filename = FindImage(foodNumber);
         if (filename == null)
         {
+            EnsureMappingLoaded();
+            int representativeId;
+            if (RepresentativeMap.TryGetValue(foodNumber, out representativeId) && representativeId != foodNumber)
+                filename = FindImage(representativeId);
+        }
+        if (filename == null)
+        {
             Missing.Add(foodNumber);
-            // Report each missing ID once; a generic warning hid cases like Castella (#68).
             if (ReportedMissing.Add(foodNumber))
                 Debug.LogWarning("[FoodTasteApp] FoodImg file missing: FoodNum=" + foodNumber +
-                    " (expected " + foodNumber + ".jpg/.jpeg/.png).");
-            return null;
+                    "; showing fallback if available.");
+            return GetFallback();
         }
 
         try
@@ -49,7 +135,7 @@ public static class FoodImageCatalog
                 UnityEngine.Object.Destroy(texture);
                 Missing.Add(foodNumber);
                 Debug.LogWarning("[FoodTasteApp] Invalid food image: " + filename);
-                return null;
+                return GetFallback();
             }
             texture.name = "FoodPhoto_" + foodNumber;
             var sprite = Sprite.Create(texture,
@@ -63,7 +149,7 @@ public static class FoodImageCatalog
             Missing.Add(foodNumber);
             Debug.LogWarning("[FoodTasteApp] Could not read food image #" + foodNumber +
                 ": " + ex.Message);
-            return null;
+            return GetFallback();
         }
     }
 
@@ -77,7 +163,7 @@ public static class FoodImageCatalog
         target.preserveAspect = true;
         // Keep an empty placeholder visible; don't leave a photo of another food.
         target.color = sprite != null ? Color.white : new Color(1f, 1f, 1f, 0f);
-        return sprite != null;
+        return sprite != null && sprite != fallbackSprite;
     }
 
     /// <summary>
@@ -118,6 +204,14 @@ public static class FoodImageCatalog
         {
             photoImage.sprite = null;
             photoImage.color = Color.clear;
+            return false;
+        }
+        if (original == fallbackSprite)
+        {
+            // Fallback needs the whole plate icon; do not center-crop it.
+            photoImage.sprite = original;
+            photoImage.color = Color.white;
+            go.transform.SetAsLastSibling();
             return false;
         }
 
