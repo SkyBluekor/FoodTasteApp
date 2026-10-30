@@ -419,9 +419,17 @@ public class PoPularChart : MonoBehaviour
         GameObject row = GameObject.Find("Popular" + (index + 1) + ordinal);
         if (row == null)
             return;
-        FoodImageCatalog.ApplyThumbnail(row.GetComponent<RectTransform>(),
-            foodNumberByName.TryGetValue(foodName, out foodNo) ? foodNo : 0,
-            330f, 78f);
+        int resolvedFoodNumber = foodNumberByName.TryGetValue(foodName, out foodNo) ? foodNo : 0;
+        // Reuse the photo/rank area already present in every PopularN row.
+        // A separate 78px thumbnail was squeezed by the scene's X/Y scaling.
+        RectTransform rowRect = row.GetComponent<RectTransform>();
+        FoodImageCatalog.RemoveLegacyThumbnail(rowRect);
+        Transform slot = row.transform.Find("RankPlaceImg");
+        if (slot != null)
+            FoodImageCatalog.ApplyToExistingSlot(slot.GetComponent<UnityEngine.UI.Image>(), resolvedFoodNumber);
+        else
+            FoodImageCatalog.ApplyThumbnail(rowRect, resolvedFoodNumber, 12f, 90f);
+        FoodImageCatalog.FitPopularRow(row.transform);
     }
 
 }
