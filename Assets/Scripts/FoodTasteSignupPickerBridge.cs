@@ -5,7 +5,7 @@ using UnityEngine.UI;
 /// Opens the existing registration profile-image picker without replacing ImageLoader.
 /// Serialized references are assigned by the signup layout tools in the Unity Editor.
 /// </summary>
-public sealed class SignupPhotoBrowserController : MonoBehaviour
+public sealed class FoodTasteSignupPickerBridge : MonoBehaviour
 {
     public GameObject Browser;
     public Button OpenButton;
