@@ -33,6 +33,19 @@ public sealed class FoodTasteSignupPickerBridge : MonoBehaviour
     public void Open()
     {
         if (Browser == null) return;
+        ScrollRect list = Browser.GetComponentInChildren<ScrollRect>(true);
+        if (list != null && list.viewport != null)
+        {
+            // The legacy sprite-based stencil mask hides the generated rows on
+            // some machines. A rectangular clip matches this scroll viewport.
+            Mask stencilMask = list.viewport.GetComponent<Mask>();
+            if (stencilMask != null)
+                stencilMask.enabled = false;
+            RectMask2D rectMask = list.viewport.GetComponent<RectMask2D>();
+            if (rectMask == null)
+                rectMask = list.viewport.gameObject.AddComponent<RectMask2D>();
+            rectMask.enabled = true;
+        }
         Browser.SetActive(true);
         Browser.transform.SetAsLastSibling();
         if (CloseButton != null)

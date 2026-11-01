@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
@@ -101,13 +100,20 @@ public class DictionarySpawner : MonoBehaviour
 
     public void SpawnData(string fileName, DataType type)
     {
-        GameObject clone = Instantiate(panelDataPrefab);
-
-        clone.transform.SetParent(parentContent);
-        clone.transform.localScale = Vector3.one;
+        // Keep the row on the canvas plane. Preserving world coordinates here
+        // can put it in front of the camera-space canvas and outside the mask.
+        GameObject clone = Instantiate(panelDataPrefab, parentContent, false);
 
         Data data = clone.GetComponent<Data>();
         data.Setup(directoryController, fileName, type);
+
+        // The row itself needs a raycastable graphic: its text does not receive
+        // raycasts, so otherwise only the small icon responds to clicks.
+        Image hitArea = clone.GetComponent<Image>();
+        if (hitArea == null)
+            hitArea = clone.AddComponent<Image>();
+        hitArea.color = Color.clear;
+        hitArea.raycastTarget = true;
         fileList.Add(data);
     }
 

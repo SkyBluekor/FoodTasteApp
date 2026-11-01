@@ -162,9 +162,11 @@ public static class FoodTasteProfilePickerInstaller
             }
             Transform viewport = scroll.Find("Viewport");
             if (viewport == null) throw new InvalidOperationException("Scroll viewport missing");
-            if (viewport.GetComponent<Mask>() == null &&
-                viewport.GetComponent<RectMask2D>() == null)
-                viewport.gameObject.AddComponent<RectMask2D>();
+            Mask stencilMask = viewport.GetComponent<Mask>();
+            if (stencilMask != null) stencilMask.enabled = false;
+            RectMask2D viewportMask = viewport.GetComponent<RectMask2D>();
+            if (viewportMask == null) viewportMask = viewport.gameObject.AddComponent<RectMask2D>();
+            viewportMask.enabled = true;
             Image viewportImage = viewport.GetComponent<Image>();
             if (viewportImage != null)
             {
