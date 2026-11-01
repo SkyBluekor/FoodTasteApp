@@ -20,7 +20,7 @@ public static class FoodTasteProfilePickerInstaller
 {
     private const string ScenePath = "Assets/Scenes/IntroScene.unity";
     private const string PrefabPath = "Assets/PanelData.prefab";
-    private const string Marker = "FoodTastePickerApplied_20261101";
+    private const string Marker = "FoodTastePickerApplied_20261101_VisibleRows";
     private const string Art = "Assets/Resources/FoodTasteProfilePicker/";
     private static bool busy;
 
@@ -174,14 +174,31 @@ public static class FoodTasteProfilePickerInstaller
 
             Transform content = viewport.Find("Content");
             if (content == null) throw new InvalidOperationException("Scroll content missing");
-            var vertical = content.GetComponent<VerticalLayoutGroup>();
-            if (vertical != null)
+            // The existing Content uses GridLayoutGroup, not VerticalLayoutGroup.
+            // Its legacy 1730px-wide cells were centered in a ~508px viewport,
+            // putting all icons and filenames outside the clipped area.
+            GridLayoutGroup grid = content.GetComponent<GridLayoutGroup>();
+            if (grid != null)
             {
-                vertical.childAlignment = TextAnchor.UpperLeft;
-                vertical.spacing = 5f;
-                vertical.padding = new RectOffset(8, 8, 9, 9);
-                vertical.childForceExpandHeight = false;
-                vertical.childControlHeight = false;
+                grid.childAlignment = TextAnchor.UpperLeft;
+                grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+                grid.constraintCount = 1;
+                grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+                grid.cellSize = new Vector2(490f, 58f);
+                grid.spacing = new Vector2(0f, 6f);
+                grid.padding = new RectOffset(8, 8, 10, 10);
+            }
+            else
+            {
+                VerticalLayoutGroup vertical = content.GetComponent<VerticalLayoutGroup>();
+                if (vertical != null)
+                {
+                    vertical.childAlignment = TextAnchor.UpperLeft;
+                    vertical.spacing = 6f;
+                    vertical.padding = new RectOffset(8, 8, 10, 10);
+                    vertical.childForceExpandHeight = false;
+                    vertical.childControlHeight = false;
+                }
             }
             var fitter = content.GetComponent<ContentSizeFitter>();
             if (fitter != null)
