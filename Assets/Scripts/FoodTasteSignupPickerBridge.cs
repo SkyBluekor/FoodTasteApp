@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,6 +40,27 @@ public sealed class FoodTasteSignupPickerBridge : MonoBehaviour
             CloseButton.gameObject.SetActive(true);
             CloseButton.transform.SetAsLastSibling();
         }
+
+        // The picker can be populated in Awake while hidden. Rebuild after
+        // it becomes visible so the content isn't left at the old bottom offset.
+        StartCoroutine(RestoreVisibleListTop());
+    }
+
+    private IEnumerator RestoreVisibleListTop()
+    {
+        yield return null;
+        Canvas.ForceUpdateCanvases();
+        if (Browser == null || !Browser.activeInHierarchy) yield break;
+        ScrollRect scroll = Browser.GetComponentInChildren<ScrollRect>(true);
+        if (scroll == null || scroll.content == null) yield break;
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(scroll.content);
+        Canvas.ForceUpdateCanvases();
+        scroll.StopMovement();
+        Vector2 position = scroll.content.anchoredPosition;
+        position.y = 0f; // Content uses top anchors and top pivot.
+        scroll.content.anchoredPosition = position;
+        scroll.verticalNormalizedPosition = 1f;
     }
 
     public void Close()
