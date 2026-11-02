@@ -65,7 +65,24 @@ public class FriendshipFunc : MonoBehaviour
 
         FriendShipBtn.onClick.AddListener(friendShipPanelFunc);
         FriendListBtn.onClick.AddListener(friendListBtnFunc);
+        FriendListBtn.transition = Selectable.Transition.None;
+        FriendRequestListBtn.transition = Selectable.Transition.None;
+        FriendRequestBtn.transition = Selectable.Transition.None;
+    }
 
+    private void LateUpdate()
+    {
+        // The request form is an overlay; highlight its tab while it is open.
+        bool showRequestForm = FriendRequestObj.activeSelf;
+        SetTabTint(FriendListBtn, !showRequestForm && FriendListPanel.activeSelf);
+        SetTabTint(FriendRequestListBtn, !showRequestForm && RequestListPanel.activeSelf);
+        SetTabTint(FriendRequestBtn, showRequestForm);
+    }
+
+    private static void SetTabTint(Button button, bool selected)
+    {
+        if (button == null || button.image == null) return;
+        button.image.color = selected ? new Color(1f, 0.85f, 0.68f, 1f) : Color.white;
     }
 
     private class Message
@@ -77,6 +94,7 @@ public class FriendshipFunc : MonoBehaviour
 
     private void friendListBtnFunc()
     {
+        FriendRequestObj.SetActive(false);
         if(RequestListPanel.activeSelf)
         {
             RequestListPanel.SetActive(false);
@@ -327,6 +345,7 @@ public class FriendshipFunc : MonoBehaviour
 
     private void RequestLIstBtnFunc()
     {
+        FriendRequestObj.SetActive(false);
         if (FriendChatPanel.activeSelf)
         {
             FriendChatPanel.SetActive(false);
@@ -382,6 +401,22 @@ public class FriendshipFunc : MonoBehaviour
         TextMeshProUGUI text = clone.GetComponentInChildren<TextMeshProUGUI>();
         text.text = nickname +" (" + FriendID +")";
         Button btn = clone.GetComponentInChildren<Button>();
+        if (btn != null && btn.GetComponentInChildren<TextMeshProUGUI>() == null)
+        {
+            var labelObject = new GameObject("ChatButtonLabel", typeof(RectTransform), typeof(TextMeshProUGUI));
+            labelObject.transform.SetParent(btn.transform, false);
+            RectTransform labelRect = labelObject.GetComponent<RectTransform>();
+            labelRect.anchorMin = labelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            labelRect.sizeDelta = new Vector2(105f, 45f);
+            labelRect.localScale = new Vector3(3.3333f, 1f, 1f);
+            TextMeshProUGUI label = labelObject.GetComponent<TextMeshProUGUI>();
+            label.font = text.font;
+            label.text = "채팅";
+            label.color = new Color(0.36f, 0.19f, 0.09f, 1f);
+            label.fontSize = 18f;
+            label.alignment = TextAlignmentOptions.Center;
+            label.raycastTarget = false;
+        }
         btn.onClick.AddListener(() => 
         {
             //친구와의 채팅창으로 입장하는 버튼 Listener

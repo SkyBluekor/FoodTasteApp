@@ -22,7 +22,6 @@ public class ForSearching : MonoBehaviour
     private int maxSearchResults = 10; // 최대 검색 결과 개수
     private List<GameObject> searchResultObjects; // 검색 결과 객체들
     private Queue<GameObject> objectPool; // 객체 풀
-    private bool isSearching; // 검색 중인지 여부
     public GameObject RelatedSearch;
     // Start is called before the first frame update
     void Start()
@@ -40,52 +39,34 @@ public class ForSearching : MonoBehaviour
         
     }
 
-    private void KMPReturn(string Searching)
+    private void KMPReturn(string searching)
     {
-        if (isSearching)
-            return;
+        // Discard the pending result before starting a newer query. Otherwise a
+        // fast edit or clearing the field can display an older search result.
+        StopAllCoroutines();
+        ClearSearchResults();
+        RelatedSearch.SetActive(false);
 
-        if (!string.IsNullOrEmpty(Searching))
-        {
-            StartCoroutine(SearchAndDisplayResults(Searching));
-        }
-        else
-        {
-            ClearSearchResults();
-            RelatedSearch.SetActive(false);
-        }
+        if (!string.IsNullOrWhiteSpace(searching))
+            StartCoroutine(SearchAndDisplayResults(searching));
     }
 
     private IEnumerator SearchAndDisplayResults(string searchString)
     {
-        isSearching = true;
-
-        ClearSearchResults();
-
         KmpValue = new List<string>();
-
         char[] pat = searchString.ToCharArray();
-
         foreach (string name in FoodName)
         {
-            char[] compareKmp = name.ToCharArray();
-
-            string kmpInput = KMPAlgo(compareKmp, pat);
-
-            if (!string.IsNullOrEmpty(kmpInput))
-            {
-                KmpValue.Add(kmpInput);
-            }
-
+            string match = KMPAlgo(name.ToCharArray(), pat);
+            if (!string.IsNullOrEmpty(match))
+                KmpValue.Add(match);
             if (KmpValue.Count >= maxSearchResults)
                 break;
         }
 
-        yield return null; // 한 프레임 대기하여 검색 결과가 화면에 표시되도록 함
-
-        DisplaySearchResults();
-
-        isSearching = false;
+        yield return null;
+        if (SearchingInput.text == searchString)
+            DisplaySearchResults();
     }
 
     private string KMPAlgo(char[] name, char[] pat)

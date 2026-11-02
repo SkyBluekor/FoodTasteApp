@@ -272,8 +272,8 @@ public static class FoodImageCatalog
 
         go.SetActive(true);
         float ratio = HorizontalCorrection(parent);
-        const float imageHeight = 90f;
-        float imageWidth = Mathf.Min(470f, imageHeight * (4f / 3f) * ratio);
+        const float imageHeight = 66f;
+        float imageWidth = Mathf.Min(parent.rect.width, imageHeight * (4f / 3f) * ratio);
 
         RectTransform photoRect = go.GetComponent<RectTransform>();
         photoRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -378,12 +378,12 @@ public static class FoodImageCatalog
         if (function == null)
             return;
         Transform root = function.transform;
-        FitPanelTitle(root.Find("GetPreFoodPanel/PanelBackGroundImg/Text (TMP)"));
-        FitPanelTitle(root.Find("GetSimUserHighFoodPanel/PanelBackGrounImg/Text (TMP)"));
-        FitPanelTitle(root.Find("PoPularFoodPanel/PanelBackGroundImg/Text (TMP)"));
+        FitPanelTitle(root.Find("GetPreFoodPanel/PanelBackGroundImg/Text (TMP)"), true);
+        FitPanelTitle(root.Find("GetSimUserHighFoodPanel/PanelBackGrounImg/Text (TMP)"), true, 23f);
+        FitPanelTitle(root.Find("PoPularFoodPanel/PanelBackGroundImg/Text (TMP)"), true, 26f);
     }
 
-    private static void FitPanelTitle(Transform title)
+    private static void FitPanelTitle(Transform title, bool recommendationTitle = false, float sizeOverride = 0f)
     {
         if (title == null)
             return;
@@ -398,12 +398,13 @@ public static class FoodImageCatalog
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.anchoredPosition = new Vector2(0f, 488f);
-        rect.sizeDelta = new Vector2(1790f / correction, 97f);
-        label.enableWordWrapping = true;
+        rect.sizeDelta = new Vector2((sizeOverride > 0f ? 1680f : 1790f) / correction,
+            sizeOverride > 0f ? 78f : (recommendationTitle ? 82f : 97f));
+        label.enableWordWrapping = !recommendationTitle;
         label.enableAutoSizing = true;
-        label.fontSizeMin = 22f;
-        label.fontSizeMax = 42f;
-        label.fontSize = 42f;
+        label.fontSizeMin = sizeOverride > 0f ? 8f : (recommendationTitle ? 12f : 22f);
+        label.fontSizeMax = sizeOverride > 0f ? sizeOverride : (recommendationTitle ? 30f : 42f);
+        label.fontSize = label.fontSizeMax;
         label.alignment = TMPro.TextAlignmentOptions.Center;
         label.overflowMode = TMPro.TextOverflowModes.Ellipsis;
     }
@@ -412,46 +413,65 @@ public static class FoodImageCatalog
     {
         if (row == null)
             return;
-        FitRowText(row, "PreFoodNameText", -465f, 665f, 43, 25);
-        FitRowText(row, "PreScoreText", 685f, 950f, 43, 28);
-        FitRowText(row, "PreText", 685f, 950f, 25, 17);
+        FitRowText(row, "PreFoodNameText", -470f, 500f, 34, 10);
+        FitRowText(row, "PreScoreText", 500f, 780f, 32, 18);
+        FitRowText(row, "PreText", 500f, 780f, 16, 10);
+        Transform name = row.Find("PreFoodNameText");
+        if (name != null)
+        {
+            RectTransform rt = name.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 70f);
+            TMPro.TextMeshProUGUI nameLabel = name.GetComponent<TMPro.TextMeshProUGUI>();
+            if (nameLabel != null)
+            {
+                nameLabel.enableWordWrapping = false;
+                nameLabel.enableAutoSizing = true;
+                nameLabel.overflowMode = TMPro.TextOverflowModes.Ellipsis;
+            }
+        }
         Transform caption = row.Find("PreText");
         if (caption != null)
         {
             RectTransform rt = caption.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, 28f);
-            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 39f);
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, 21f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 27f);
         }
         Transform score = row.Find("PreScoreText");
         if (score != null)
         {
             RectTransform rt = score.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, -22f);
-            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 55f);
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, -15f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 40f);
         }
     }
 
     public static void FitPopularRow(Transform row)
     {
-        if (row == null)
-            return;
-        FitRowText(row, "PopularFoodNameText", -695f, 825f, 43, 25);
-        FitRowText(row, "PopularScoreText", 850f, 1190f, 42, 24);
-        // The small "search count" caption stays in its own column.
-        FitRowText(row, "PopularText", 850f, 1190f, 28, 19);
+        if (row == null) return;
+        FitRowText(row, "PopularFoodNameText", -665f, 505f, 34, 10);
+        FitRowText(row, "PopularScoreText", 670f, 950f, 32, 18);
+        FitRowText(row, "PopularText", 670f, 950f, 16, 10);
+        Transform name = row.Find("PopularFoodNameText");
+        if (name != null)
+        {
+            RectTransform rt = name.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 75f);
+            TMPro.TextMeshProUGUI label = name.GetComponent<TMPro.TextMeshProUGUI>();
+            if (label != null) label.enableWordWrapping = false;
+        }
         Transform caption = row.Find("PopularText");
         if (caption != null)
         {
             RectTransform rt = caption.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, 27f);
-            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 42f);
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, 22f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 27f);
         }
         Transform score = row.Find("PopularScoreText");
         if (score != null)
         {
             RectTransform rt = score.GetComponent<RectTransform>();
-            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, -22f);
-            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 55f);
+            rt.anchoredPosition = new Vector2(rt.anchoredPosition.x, -15f);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 42f);
         }
     }
 
@@ -461,23 +481,23 @@ public static class FoodImageCatalog
         if (image == null)
             return;
         RectTransform photo = image.rectTransform;
-        float correction = HorizontalCorrection(photo);
-        const float height = 132f;
-        float width = Mathf.Min(730f, height * (4f / 3f) * correction);
-        photo.anchorMin = new Vector2(0.5f, 0.5f);
-        photo.anchorMax = new Vector2(0.5f, 0.5f);
+        photo.anchorMin = photo.anchorMax = new Vector2(0.5f, 0.5f);
         photo.pivot = new Vector2(0.5f, 0.5f);
-        photo.anchoredPosition = new Vector2(-960f + width * 0.5f, 0f);
-        photo.sizeDelta = new Vector2(width, height);
+        photo.anchoredPosition = new Vector2(-670f, 0f);
+        photo.sizeDelta = new Vector2(260f, 112f);
         photo.localScale = Vector3.one;
         image.preserveAspect = false;
         image.type = Image.Type.Simple;
-        // Center-cropped source sprites can be used when available. A regular
-        // 4:3 source also displays correctly once the rect's ratio is adjusted.
         if (name != null)
-            FitRowText(name.transform.parent, name.name, -265f, 580f, 45, 27);
+        {
+            FitRowText(name.transform.parent, name.name, -500f, 470f, 34, 10);
+            name.enableWordWrapping = false;
+        }
         if (score != null)
-            FitRowText(score.transform.parent, score.name, 605f, 955f, 44, 25);
+        {
+            FitRowText(score.transform.parent, score.name, 490f, 780f, 30, 16);
+            score.enableWordWrapping = false;
+        }
     }
 
     /// <summary>

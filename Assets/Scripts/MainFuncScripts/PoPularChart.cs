@@ -24,6 +24,8 @@ public class PoPularChart : MonoBehaviour
     void Start()
     {
         FoodImageCatalog.FitMainPanelTitles();
+        UpdateModeAppearance();
+        SetBtntextColor(currentSetDay);
         if(PanelCheck.activeInHierarchy) 
         {
             GetPoPularData();
@@ -276,37 +278,48 @@ public class PoPularChart : MonoBehaviour
     }
 
   
-    private void SetBtntextColor(string Day)
+    private static readonly Color SelectedBackground = new Color(1f, 0.86f, 0.70f, 1f);
+    private static readonly Color NormalBackground = Color.white;
+    private static readonly Color LabelBrown = new Color(0.36f, 0.19f, 0.09f, 1f);
+
+    private void UpdateModeAppearance()
     {
-        TextMeshProUGUI[] SetTxt = new TextMeshProUGUI[3];
-        SetTxt[0] = SetTodayBtn.GetComponent<TextMeshProUGUI>();
-        SetTxt[1] =  SetWeekBtn.GetComponent<TextMeshProUGUI>();
-        SetTxt[2] = SetTotalBtn.GetComponent<TextMeshProUGUI>();
-
-        if (Day == "today")
-        {
-            SetTxt[0].color = Color.yellow;
-            SetTxt[1].color = Color.white;
-            SetTxt[2].color = Color.white;
-        }
-        else if(Day == "week" )
-        {
-            SetTxt[0].color = Color.white;
-            SetTxt[1].color = Color.yellow;
-            SetTxt[2].color = Color.white;
-        }
-        else if(Day == "total")
-        {
-            SetTxt[0].color = Color.white;
-            SetTxt[1].color = Color.white;
-            SetTxt[2].color = Color.yellow;
-        }
-
+        SetModeAppearance(PoPularSearchBtn, CurrentTag == "search");
+        SetModeAppearance(PoPularMenuBtn, CurrentTag == "eaten");
     }
+
+    private static void SetModeAppearance(Button button, bool selected)
+    {
+        if (button == null) return;
+        button.transition = Selectable.Transition.None;
+        Image background = button.GetComponent<Image>();
+        if (background != null)
+            background.color = selected ? SelectedBackground : NormalBackground;
+    }
+
+    private static void SetPeriodAppearance(Button button, bool selected)
+    {
+        if (button == null) return;
+        button.transition = Selectable.Transition.None;
+        TextMeshProUGUI text = button.GetComponent<TextMeshProUGUI>();
+        if (text != null) text.color = LabelBrown;
+        Transform background = button.transform.parent.Find(button.name + "Background");
+        Image image = background != null ? background.GetComponent<Image>() : null;
+        if (image != null) image.color = selected ? SelectedBackground : NormalBackground;
+    }
+
+    private void SetBtntextColor(string day)
+    {
+        SetPeriodAppearance(SetTodayBtn, day == "today");
+        SetPeriodAppearance(SetWeekBtn, day == "week");
+        SetPeriodAppearance(SetTotalBtn, day == "total");
+    }
+
     private void PoPularSearchBtnAction(List<List<TextMeshProUGUI>> PlaceObj)
     {
         Debug.Log(PlaceObj.Count + "placeobj 갯수" + TotalSearchCount.Count + "searchcoun 갯수");
         CurrentTag = "search";
+        UpdateModeAppearance();
         List<(string, int)> CurrentList = new List<(string, int)>();
 
         if( currentSetDay == "today")
@@ -362,6 +375,7 @@ public class PoPularChart : MonoBehaviour
     private void PoPularEatenBtnAction(List<List<TextMeshProUGUI>> PlaceObj)
     {
         CurrentTag = "eaten";
+        UpdateModeAppearance();
         int PlaceObjRow = PlaceObj[0].Count;
         List<(string,int)> CurrentList = new List<(string, int)>();
         if (currentSetDay == "today")
