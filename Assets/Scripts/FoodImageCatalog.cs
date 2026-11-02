@@ -18,9 +18,37 @@ public static class FoodImageCatalog
     private static readonly Dictionary<string, Sprite> CoverSprites = new Dictionary<string, Sprite>();
     private static readonly HashSet<int> ReportedMissing = new HashSet<int>();
     private static readonly Dictionary<int, int> RepresentativeMap = new Dictionary<int, int>();
+    // Explicitly audited mismatches. Never display a visually incorrect photo
+    // just because its filename happens to match the FoodNum primary key.
+    private static readonly HashSet<int> RejectedImages = new HashSet<int>();
+    private static readonly HashSet<int> ReportedRejected = new HashSet<int>();
+    private static bool rejectedLoaded;
     private static bool mappingLoaded;
     private static bool fallbackAttempted;
     private static Sprite fallbackSprite;
+
+    // Kept separate from FoodImageMapping: rejected photos are excluded even
+    // when a numbered JPG exists, and can be reviewed without recompiling.
+    private static void EnsureRejectedLoaded()
+    {
+        if (rejectedLoaded) return;
+        rejectedLoaded = true;
+
+        TextAsset list = Resources.Load<TextAsset>("FoodImageRejected");
+        if (list == null) return;
+
+        using (var reader = new StringReader(list.text))
+        {
+            string line;
+            while ((line = reader.ReadLine()) != null)
+            {
+                string first = line.TrimStart('\uFEFF').Split(',')[0].Trim();
+                int foodNumber;
+                if (int.TryParse(first, out foodNumber) && foodNumber > 0)
+                    RejectedImages.Add(foodNumber);
+            }
+        }
+    }
 
     // Unity embeds Assets/Resources/FoodImageMapping.csv in both Editor and builds.
     private static void EnsureMappingLoaded()
@@ -102,6 +130,15 @@ public static class FoodImageCatalog
         if (foodNumber <= 0)
             return null;
 
+        EnsureRejectedLoaded();
+        if (RejectedImages.Contains(foodNumber))
+        {
+            if (ReportedRejected.Add(foodNumber))
+                Debug.LogWarning("[FoodTasteApp] Wrong food photo quarantined: FoodNum=" +
+                    foodNumber + "; showing fallback until a verified photo is provided.");
+            return GetFallback();
+        }
+
         Sprite cached;
         if (Sprites.TryGetValue(foodNumber, out cached))
             return cached;
@@ -114,7 +151,8 @@ public static class FoodImageCatalog
         {
             EnsureMappingLoaded();
             int representativeId;
-            if (RepresentativeMap.TryGetValue(foodNumber, out representativeId) && representativeId != foodNumber)
+            if (RepresentativeMap.TryGetValue(foodNumber, out representativeId) &&
+                representativeId != foodNumber && !RejectedImages.Contains(representativeId))
                 filename = FindImage(representativeId);
         }
         if (filename == null)
