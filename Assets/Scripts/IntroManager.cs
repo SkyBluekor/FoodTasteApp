@@ -154,9 +154,8 @@ public class IntroManager : MonoBehaviour
             if(IDCheck && PwdCheck)
             {
                 Debug.Log("로그인 성공");
-                SuccessLogin();
-                string playerid = PlayerPrefs.GetString("playerid");
-                SceneManager.LoadScene("MainFuncScene");
+                // Show the login success artwork before changing scenes.
+                StartCoroutine(SuccessLogin());
             }
             else
             {
@@ -204,9 +203,10 @@ public class IntroManager : MonoBehaviour
         LoginFail.SetActive(false);
     }
 
-    private async void SuccessLogin()
+    private IEnumerator SuccessLogin()
     {
         LoginSuccess.SetActive(true);
-        await Task.Delay(1000);
+        yield return new WaitForSecondsRealtime(1f);
+        SceneManager.LoadScene("MainFuncScene");
     }
 }
