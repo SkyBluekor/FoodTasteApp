@@ -54,6 +54,23 @@ public static class FoodImageCatalog
     private static readonly Dictionary<int, int> DatabaseToPhotoNumber = new Dictionary<int, int>();
     private static bool databaseMappingLoaded;
 
+    // With domain reload disabled, static fields survive between Play sessions,
+    // but Unity may already have destroyed the sprites they referenced.
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetForPlaySession()
+    {
+        Sprites.Clear();
+        Missing.Clear();
+        CoverSprites.Clear();
+        ReportedMissing.Clear();
+        RepresentativeMap.Clear();
+        DatabaseToPhotoNumber.Clear();
+        representativeMappingLoaded = false;
+        databaseMappingLoaded = false;
+        fallbackAttempted = false;
+        fallbackSprite = null;
+    }
+
     private static void EnsureDatabaseMappingLoaded()
     {
         if (databaseMappingLoaded) return;
@@ -115,7 +132,7 @@ public static class FoodImageCatalog
 
     private static Sprite GetFallback()
     {
-        if (fallbackAttempted)
+        if (fallbackAttempted && fallbackSprite != null)
             return fallbackSprite;
         fallbackAttempted = true;
         string filename = FindNonNumberedImage("FoodImageFallback.png");
@@ -168,7 +185,10 @@ public static class FoodImageCatalog
 
         Sprite cached;
         if (Sprites.TryGetValue(foodNumber, out cached))
-            return cached;
+        {
+            if (cached != null) return cached;
+            Sprites.Remove(foodNumber);
+        }
         if (Missing.Contains(foodNumber))
             return GetFallback();
 
@@ -285,7 +305,7 @@ public static class FoodImageCatalog
             // Center crop source to 4:3 BEFORE the panel's scale correction.
             string key = foodNumber + "_four_by_three";
             Sprite cropped;
-            if (!CoverSprites.TryGetValue(key, out cropped))
+            if (!CoverSprites.TryGetValue(key, out cropped) || cropped == null)
             {
                 Texture2D texture = source.texture;
                 float width = texture.width;

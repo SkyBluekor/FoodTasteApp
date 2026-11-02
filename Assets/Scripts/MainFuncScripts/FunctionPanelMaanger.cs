@@ -24,16 +24,18 @@ public class FunctionPanelMaanger : MonoBehaviour
     private float rotationSpeed = 60.0f;
     private int previousQuotient = 0;
     private int currentImageIndex = 0;
-    private Quaternion initialRotation;
+    private float mealRotation;
+    private int mealHalfTurn;
 
     // Start is called before the first frame update
     void Start()
     {
-        initialRotation = Morning.transform.localRotation;
         EatenImages = new RawImage[3];
         EatenImages[0] = Morning;
         EatenImages[1] = AfterNoon;
         EatenImages[2] = Night;
+        for (int i = 0; i < EatenImages.Length; i++)
+            EatenImages[i].gameObject.SetActive(i == 0);
 
         ChEvaPanelBtn.onClick.AddListener(() => 
         {
@@ -89,24 +91,22 @@ public class FunctionPanelMaanger : MonoBehaviour
             ChBack.gameObject.SetActive(false);
         }
 
-        Quaternion currentRotation = Morning.transform.localRotation;
-
-        if(Quaternion.Angle(initialRotation, currentRotation) >= 90.0f)
+        mealRotation += rotationAngle;
+        int halfTurn = Mathf.FloorToInt((mealRotation + 90f) / 180f);
+        if (halfTurn != mealHalfTurn)
         {
-            currentImageIndex = (currentImageIndex + 1) % EatenImages.Length;
-
-            // 모든 이미지를 비활성화
-            foreach (RawImage image in EatenImages)
-            {
-                image.gameObject.SetActive(false);
-            }
-
-            // 현재 이미지를 활성화
-            EatenImages[currentImageIndex].gameObject.SetActive(true);
-
-            // 현재 회전을 초기 회전으로 업데이트
-            initialRotation = currentRotation;
+            mealHalfTurn = halfTurn;
+            currentImageIndex = halfTurn % EatenImages.Length;
+            for (int i = 0; i < EatenImages.Length; i++)
+                EatenImages[i].gameObject.SetActive(i == currentImageIndex);
         }
+
+        // A rotated UI image is mirrored on its back side. Flip its UVs there
+        // so each meal image reads normally as it turns toward the viewer.
+        bool backFacing = Mathf.Repeat(mealRotation, 360f) > 90f &&
+                          Mathf.Repeat(mealRotation, 360f) < 270f;
+        EatenImages[currentImageIndex].uvRect = backFacing
+            ? new Rect(1f, 0f, -1f, 1f) : new Rect(0f, 0f, 1f, 1f);
 
     }
 

@@ -53,6 +53,26 @@ public class IntroManager : MonoBehaviour
         conn.Close();
     }
 
+    private static void FitLoginPopupToScreen(GameObject popup)
+    {
+        if (popup == null) return;
+        RectTransform rect = popup.transform as RectTransform;
+        Canvas canvas = popup.GetComponentInParent<Canvas>();
+        if (rect == null || canvas == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        RectTransform canvasRect = canvas.rootCanvas.transform as RectTransform;
+        if (canvasRect == null || canvasRect.rect.width <= 0f || canvasRect.rect.height <= 0f) return;
+
+        // Keep the entire popup inside the actual Game view, including narrow windows.
+        float scale = Mathf.Min(1f, (canvasRect.rect.width * 0.92f) / 760f,
+            (canvasRect.rect.height * 0.92f) / 570f);
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(760f, 570f) * scale;
+    }
+
     private void SubmitInput(string inputText)
     {
         if (Input.GetKeyDown(KeyCode.Return))
@@ -191,7 +211,11 @@ public class IntroManager : MonoBehaviour
 
     public void ActivePanelForSeconds(float seconds)
     {
+        LoginSuccess.SetActive(false);
+        LoginFail.transform.SetAsLastSibling();
+        FitLoginPopupToScreen(LoginFail);
         LoginFail.SetActive(true);
+        CancelInvoke(nameof(DeActiveLoginFail));
         PwdInputField.text = "";
         Invoke("DeActiveLoginFail", seconds);
         PwdInputField.Select();
@@ -205,6 +229,9 @@ public class IntroManager : MonoBehaviour
 
     private IEnumerator SuccessLogin()
     {
+        LoginFail.SetActive(false);
+        LoginSuccess.transform.SetAsLastSibling();
+        FitLoginPopupToScreen(LoginSuccess);
         LoginSuccess.SetActive(true);
         yield return new WaitForSecondsRealtime(1f);
         SceneManager.LoadScene("MainFuncScene");
