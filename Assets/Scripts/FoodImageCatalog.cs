@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Xml;
+using MySql.Data.MySqlClient;
 
 /// <summary>
-/// Loads any food photo by the Fooddata.FoodNum primary key.
+/// Resolves database foods against the original XML and displays reviewed photos.
 /// In Editor: Assets/Images/FoodImg/{FoodNum}.jpg/png.
 /// In builds: StreamingAssets/FoodImg, or a FoodImg directory beside the executable.
 /// Missing files are handled without crashing or showing another food's photograph.
@@ -17,70 +19,99 @@ public static class FoodImageCatalog
     private static readonly string[] Extensions = { ".jpg", ".jpeg", ".png" };
     private static readonly Dictionary<string, Sprite> CoverSprites = new Dictionary<string, Sprite>();
     private static readonly HashSet<int> ReportedMissing = new HashSet<int>();
-    private static readonly Dictionary<int, int> RepresentativeMap = new Dictionary<int, int>();
-    // Explicitly audited mismatches. Never display a visually incorrect photo
-    // just because its filename happens to match the FoodNum primary key.
-    private static readonly HashSet<int> RejectedImages = new HashSet<int>();
-    private static readonly HashSet<int> ReportedRejected = new HashSet<int>();
-    private static bool rejectedLoaded;
-    private static bool mappingLoaded;
     private static bool fallbackAttempted;
     private static Sprite fallbackSprite;
 
-    // Kept separate from FoodImageMapping: rejected photos are excluded even
-    // when a numbered JPG exists, and can be reviewed without recompiling.
-    private static void EnsureRejectedLoaded()
+    // The numbered collection through 996 follows the XML sequence. From
+    // 1000 onward the image sequence differs, so never use those IDs directly.
+    private static bool IsUsablePhotoNumber(int number)
     {
-        if (rejectedLoaded) return;
-        rejectedLoaded = true;
-
-        TextAsset list = Resources.Load<TextAsset>("FoodImageRejected");
-        if (list == null) return;
-
-        using (var reader = new StringReader(list.text))
-        {
-            string line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                string first = line.TrimStart('\uFEFF').Split(',')[0].Trim();
-                int foodNumber;
-                if (int.TryParse(first, out foodNumber) && foodNumber > 0)
-                    RejectedImages.Add(foodNumber);
-            }
-        }
+        return number > 0 && number <= 996;
     }
 
-    // Unity embeds Assets/Resources/FoodImageMapping.csv in both Editor and builds.
-    private static void EnsureMappingLoaded()
-    {
-        if (mappingLoaded)
-            return;
-        mappingLoaded = true;
-        TextAsset asset = Resources.Load<TextAsset>("FoodImageMapping");
-        if (asset == null)
-        {
-            Debug.LogWarning("[FoodTasteApp] FoodImageMapping.csv missing from Resources; photos will use exact IDs.");
-            return;
-        }
+    private static readonly Dictionary<int, int> RepresentativeMap = new Dictionary<int, int>();
+    private static bool representativeMappingLoaded;
 
+    private static void EnsureRepresentativeMappingLoaded()
+    {
+        if (representativeMappingLoaded) return;
+        representativeMappingLoaded = true;
+        TextAsset asset = Resources.Load<TextAsset>("FoodImageMapping");
+        if (asset == null) return;
         using (var reader = new StringReader(asset.text))
         {
             string line;
             while ((line = reader.ReadLine()) != null)
             {
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("FoodNum", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
                 string[] fields = line.TrimStart('\uFEFF').Split(',');
                 int source, target;
-                if (fields.Length >= 2 &&
-                    int.TryParse(fields[0].Trim(), out source) &&
-                    int.TryParse(fields[1].Trim(), out target) &&
-                    source > 0 && target > 0)
+                if (fields.Length >= 2 && int.TryParse(fields[0], out source) &&
+                    int.TryParse(fields[1], out target) && source > 0 && IsUsablePhotoNumber(target))
                     RepresentativeMap[source] = target;
             }
         }
     }
+    private static readonly Dictionary<int, int> DatabaseToPhotoNumber = new Dictionary<int, int>();
+    private static bool databaseMappingLoaded;
+
+    private static void EnsureDatabaseMappingLoaded()
+    {
+        if (databaseMappingLoaded) return;
+        databaseMappingLoaded = true;
+        try
+        {
+            TextAsset asset = Resources.Load<TextAsset>("XML/전국통합식품영양성분정보(음식)표준데이터");
+            if (asset == null) throw new InvalidOperationException("Food XML is missing");
+            var xml = new XmlDocument();
+            xml.LoadXml(asset.text);
+            var namesByNumber = new Dictionary<int, string>();
+            var numbersByName = new Dictionary<string, int>(StringComparer.Ordinal);
+            var earlyNumbersByName = new Dictionary<string, int>(StringComparer.Ordinal);
+            int number = 0;
+            foreach (XmlNode node in xml.SelectNodes("dataGrid/records/record"))
+            {
+                number++;
+                XmlNode nameNode = node.SelectSingleNode("식품명");
+                string name = nameNode == null ? "" : nameNode.InnerText.Trim();
+                namesByNumber[number] = name;
+                if (name.Length == 0) continue;
+                if (IsUsablePhotoNumber(number) && !earlyNumbersByName.ContainsKey(name))
+                    earlyNumbersByName.Add(name, number);
+                // A repeated name cannot safely identify one particular photo.
+                if (numbersByName.ContainsKey(name)) numbersByName[name] = 0;
+                else numbersByName.Add(name, number);
+            }
+            string connectionString = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new MySqlCommand("SELECT FoodNum, FoodName FROM fooddata", connection))
+                using (var reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        int dbNumber = Convert.ToInt32(reader.GetValue(0));
+                        string dbName = reader.IsDBNull(1) ? "" : reader.GetString(1).Trim();
+                        string expected;
+                        int photoNumber;
+                        if (dbName.Length > 0 && earlyNumbersByName.TryGetValue(dbName, out photoNumber) &&
+                            (!namesByNumber.TryGetValue(dbNumber, out expected) || expected != dbName || !IsUsablePhotoNumber(dbNumber)))
+                            DatabaseToPhotoNumber[dbNumber] = photoNumber;
+                        else if (namesByNumber.TryGetValue(dbNumber, out expected) && expected == dbName && dbName.Length > 0)
+                            DatabaseToPhotoNumber[dbNumber] = dbNumber;
+                        else if (numbersByName.TryGetValue(dbName, out photoNumber) && photoNumber > 0)
+                            DatabaseToPhotoNumber[dbNumber] = photoNumber;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            DatabaseToPhotoNumber.Clear();
+            Debug.LogWarning("[FoodTasteApp] Could not verify food image mapping; using fallback: " + ex.Message);
+        }
+    }
+
 
     private static Sprite GetFallback()
     {
@@ -128,16 +159,12 @@ public static class FoodImageCatalog
     public static Sprite Get(int foodNumber)
     {
         if (foodNumber <= 0)
-            return null;
-
-        EnsureRejectedLoaded();
-        if (RejectedImages.Contains(foodNumber))
-        {
-            if (ReportedRejected.Add(foodNumber))
-                Debug.LogWarning("[FoodTasteApp] Wrong food photo quarantined: FoodNum=" +
-                    foodNumber + "; showing fallback until a verified photo is provided.");
             return GetFallback();
-        }
+
+        EnsureDatabaseMappingLoaded();
+        int photoNumber;
+        if (!DatabaseToPhotoNumber.TryGetValue(foodNumber, out photoNumber))
+            return GetFallback();
 
         Sprite cached;
         if (Sprites.TryGetValue(foodNumber, out cached))
@@ -145,15 +172,13 @@ public static class FoodImageCatalog
         if (Missing.Contains(foodNumber))
             return GetFallback();
 
-        // Direct FoodNum files always take priority over any representative mapping.
-        string filename = FindImage(foodNumber);
-        if (filename == null)
+        string filename = IsUsablePhotoNumber(photoNumber) ? FindImage(photoNumber) : null;
+        if (filename == null && IsUsablePhotoNumber(photoNumber))
         {
-            EnsureMappingLoaded();
-            int representativeId;
-            if (RepresentativeMap.TryGetValue(foodNumber, out representativeId) &&
-                representativeId != foodNumber && !RejectedImages.Contains(representativeId))
-                filename = FindImage(representativeId);
+            EnsureRepresentativeMappingLoaded();
+            int representative;
+            if (RepresentativeMap.TryGetValue(photoNumber, out representative))
+                filename = FindImage(representative);
         }
         if (filename == null)
         {

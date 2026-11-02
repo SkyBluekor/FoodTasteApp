@@ -65,12 +65,12 @@ public class LoadApi : MonoBehaviour
                 
                 cmd = new MySqlCommand(InsertFoodData, conn);
                 cmd.ExecuteNonQuery();
-                i++;
             }
             catch(MySql.Data.MySqlClient.MySqlException e)
             {
                 Debug.Log(e.Message);
             }
+            i++; // XML position must advance even when this row already exists.
             
 
             
