@@ -19,7 +19,7 @@ public class MyInfoPanelManager : MonoBehaviour
     private List<(string,int)> MyFoodDataList;
     public Transform FoodScrollViewTransform;
     public GameObject FoodInfoPrefab,PasswordChangePanel;
-    private List<GameObject> FoodInfoList;
+    private List<GameObject> FoodInfoList = new List<GameObject>();
     public TMPro.TMP_InputField CurrentPassword, CurrentPasswordCheck, ChangePassword;
     public Button PassWordChangeConfirmBtn, PasswordChangePanelExitBtn;
 
@@ -87,7 +87,15 @@ public class MyInfoPanelManager : MonoBehaviour
     private void GetMyInfoData()
     {
         MyFoodDataList = new List<(string,int)> ();
-        FoodInfoList = new List<GameObject> ();
+        foreach (GameObject foodInfo in FoodInfoList)
+        {
+            if (foodInfo != null) Destroy(foodInfo);
+        }
+        FoodInfoList.Clear();
+        MyId.text = currentID;
+        MyFoodCount.text = "0 개";
+        MyAvgScore.text = "0 점";
+        DefaultProfileImage.Apply(ProfileImg);
         MySqlConnection conn = new MySqlConnection(connStr);
         try
         {
@@ -103,24 +111,16 @@ public class MyInfoPanelManager : MonoBehaviour
                     long imgsize = reader.GetBytes(1, 0, null, 0, 0);
                     byte[] imgbytes = new byte[imgsize];
                     reader.GetBytes(1,0,imgbytes,0,(int)imgsize);
-                    if(imgbytes.Length > 0)
-                    {
-                        Texture2D tex = new Texture2D(1, 1);
-                        tex.LoadImage(imgbytes);
-                        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.one * 0.5f);
-                        ProfileImg.sprite = sprite;
-
-                    }
+                    DefaultProfileImage.Apply(ProfileImg, imgbytes);
                 }
             }
             reader.Close();
 
-            cmd = new MySqlCommand("select count(foodtastescore.foodnum), round(avg(foodtastescore.foodscore), 2), user.nickname from foodtastescore join user on foodtastescore.id = user.id where foodtastescore.id = @currentID",conn);
+            cmd = new MySqlCommand("select count(foodnum), round(avg(foodscore), 2) from foodtastescore where id = @currentID",conn);
             cmd.Parameters.AddWithValue("@currentID", currentID);
             reader = cmd.ExecuteReader();
             while (reader.Read()) 
             {
-                MyId.text = currentID;
                 MyFoodCount.text = reader.GetInt32(0).ToString() +" 개";
                 if(!reader.IsDBNull(1))
                 {
@@ -130,7 +130,6 @@ public class MyInfoPanelManager : MonoBehaviour
                 {
                     MyAvgScore.text = "0 점";
                 }
-                //MyNickName.text = reader.GetString(2);
             }
             reader.Close();
 

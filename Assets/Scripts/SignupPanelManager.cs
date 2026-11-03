@@ -165,7 +165,9 @@ public class SignupPanelManager : MonoBehaviour
         {
             conn.Open();
             Debug.Log("conn start");
-            if (imgdir != null)
+            FileSize = 0;
+            rawdata = null;
+            if (!string.IsNullOrEmpty(imgdir))
             {
                 fs = new FileStream(imgdir, FileMode.Open, FileAccess.Read);
                 FileSize = (int)fs.Length;
@@ -210,20 +212,13 @@ public class SignupPanelManager : MonoBehaviour
                 Debug.Log(e.Message);
             }
 
-            string insertnullImg = "Insert into user(Id,Pwd,NickName,Age,Region) values('" + Id + "','" + PWD + "','" + NickName + "','" + age + "','" + DoRegion +" " + SiguRegion;
-            string insertQuery = " Insert into user(Id,Pwd,NickName,Age,Region,ProImg) values('" + Id + "','" + PWD + "','" + NickName + "','" + age + "','" + DoRegion +" " + SiguRegion + "', + @image)";
-            
-            Debug.Log(insertQuery);
-            Debug.Log("Imgdir " + imgdir);
-            if (imgdir == "")
-            {
-                cmd = new MySqlCommand(insertnullImg, conn);
-            }
-            else if (!(imgdir == ""))
-            {
-                cmd = new MySqlCommand(insertQuery, conn);
-                cmd.Parameters.AddWithValue("@image", rawdata);
-            }
+            cmd = new MySqlCommand("INSERT INTO user (Id, Pwd, NickName, Age, Region, ProImg) VALUES (@id, @pwd, @nickname, @age, @region, @image)", conn);
+            cmd.Parameters.AddWithValue("@id", Id);
+            cmd.Parameters.AddWithValue("@pwd", PWD);
+            cmd.Parameters.AddWithValue("@nickname", NickName);
+            cmd.Parameters.AddWithValue("@age", age);
+            cmd.Parameters.AddWithValue("@region", DoRegion + " " + SiguRegion);
+            cmd.Parameters.AddWithValue("@image", (object)rawdata ?? DBNull.Value);
             if (FileSize <= 16777215 && NickCheck != 1 && PWD.Equals(PWDCheck) && IDCheck !=1 && Id != "" && PWD != "" && PWDCheck != "" && NickName != "" && DoRegion !="도 선택" && SiguRegion !="구 선택")
             {
                 cmd.ExecuteNonQuery();

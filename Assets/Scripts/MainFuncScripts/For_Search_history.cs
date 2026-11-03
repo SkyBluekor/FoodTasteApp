@@ -191,9 +191,13 @@ public class For_Search_history : MonoBehaviour
                 }
                 ReplyList.Add((userid, reader.GetDateTime("replydate"), reader.GetString("content"),foodscore,reader.GetInt32("comment_id")));
                 int proimgindex = reader.GetOrdinal("proimg");
-                long imgsize = reader.GetBytes(proimgindex, 0, null, 0, 0);
-                byte[] imgbytes = new byte[imgsize];
-                reader.GetBytes(proimgindex, 0, imgbytes, 0, (int)imgsize);
+                byte[] imgbytes = null;
+                if (!reader.IsDBNull(proimgindex))
+                {
+                    long imgsize = reader.GetBytes(proimgindex, 0, null, 0, 0);
+                    imgbytes = new byte[imgsize];
+                    reader.GetBytes(proimgindex, 0, imgbytes, 0, (int)imgsize);
+                }
                 if (!UserProDic.ContainsKey(userid))
                 {
                     UserProDic.Add(userid, imgbytes);
@@ -244,13 +248,7 @@ public class For_Search_history : MonoBehaviour
                 }
                 textmeshes[4].text = ReplyList[i].Item5.ToString(); // 댓글ID
                 byte[] proimg = UserProDic[ReplyList[i].Item1];
-                if(proimg.Length > 0)
-                {
-                    Texture2D tex = new Texture2D(1, 1);
-                    tex.LoadImage(proimg);
-                    Sprite sprtie = Sprite.Create(tex, new Rect(0,0,tex.width,tex.height),Vector2.one *0.5f);
-                    contentproImg.sprite = sprtie;
-                }
+                DefaultProfileImage.Apply(contentproImg, proimg);
                 textmeshes.Clear();
 
             }

@@ -31,7 +31,7 @@ public class GettingProfileImg : MonoBehaviour
         {
             previousText = SimUserId.text;
         }
-        GetBLOB(SimUserId.text);
+        if (SimUserId != null) TextChanged(SimUserId.text);
         GetFriendBLOB();
 
         if(FriendButton != null) 
@@ -73,21 +73,11 @@ public class GettingProfileImg : MonoBehaviour
         var tuple = IDandBlobs.FirstOrDefault(item => item.Item1.Equals(newText,StringComparison.OrdinalIgnoreCase));
         if(tuple != default)
         {
-            if(tuple.Item2 == null)
-            {
-                UserProfileImg.sprite = userIcon;
-            }
-            else
-            {
-                Texture2D tex = new Texture2D(1, 1);
-                tex.LoadImage(tuple.Item2);
-                Sprite iconsprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height),Vector2.zero);
-                UserProfileImg.sprite = iconsprite;
-            }
+            DefaultProfileImage.Apply(UserProfileImg, tuple.Item2);
         }
         else
         {
-            Debug.Log("newID는 리스트에 존재하지 X");
+            DefaultProfileImage.Apply(UserProfileImg);
         }
 
 
@@ -194,20 +184,8 @@ public class GettingProfileImg : MonoBehaviour
             
 
             var tuple = IDandBlobs.FirstOrDefault(item => item.Item1.Equals(friendid, StringComparison.OrdinalIgnoreCase));
-            if (tuple != default)
-            {
-                if (tuple.Item2 == null)
-                {
-                    
-                }
-                else
-                {
-                    Texture2D tex = new Texture2D(1, 1);
-                    tex.LoadImage(tuple.Item2);
-                    Sprite iconsprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-                    imgComponent[1].sprite = iconsprite;
-                }
-            }
+            if (imgComponent.Length > 1)
+                DefaultProfileImage.Apply(imgComponent[1], tuple != default ? tuple.Item2 : null);
         }
     }
 

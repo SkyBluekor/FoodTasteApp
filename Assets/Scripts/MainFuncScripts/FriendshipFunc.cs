@@ -205,7 +205,9 @@ public class FriendshipFunc : MonoBehaviour
         try
         {
             conn.Open();
-            cmd = new MySqlCommand("SELECT u.id AS friend_id, u.nickname AS friend_nickname FROM user AS u JOIN friendships AS f ON (u.id = f.user_id_1 OR u.id = f.user_id_2) WHERE (f.user_id_1 = @currentID OR f.user_id_2 = @currentID) AND f.status = 'acceptance' AND u.id != @currentID;", conn);
+            // User IDs use utf8mb4_unicode_ci; friendship IDs use utf8mb4_0900_ai_ci.
+            // Use the user table's comparison rules for joins without changing the database schema.
+            cmd = new MySqlCommand("SELECT DISTINCT u.id AS friend_id, u.nickname AS friend_nickname FROM user AS u JOIN friendships AS f ON (u.id = f.user_id_1 COLLATE utf8mb4_unicode_ci OR u.id = f.user_id_2 COLLATE utf8mb4_unicode_ci) WHERE (f.user_id_1 COLLATE utf8mb4_unicode_ci = @currentID OR f.user_id_2 COLLATE utf8mb4_unicode_ci = @currentID) AND f.status = 'acceptance' AND u.id != @currentID;", conn);
             cmd.Parameters.AddWithValue("@currentID", currentID);
 
             MySqlDataReader reader = cmd.ExecuteReader();
@@ -218,7 +220,7 @@ public class FriendshipFunc : MonoBehaviour
             reader.Close();
 
 
-            cmd = new MySqlCommand("SELECT fr.sender_id, fr.status, u.nickname FROM friend_requests fr JOIN user u ON fr.sender_id = u.id WHERE fr.receiver_id = @currentID", conn);
+            cmd = new MySqlCommand("SELECT fr.sender_id, fr.status, u.nickname FROM friend_requests fr JOIN user u ON fr.sender_id COLLATE utf8mb4_unicode_ci = u.id WHERE fr.receiver_id COLLATE utf8mb4_unicode_ci = @currentID", conn);
             cmd.Parameters.AddWithValue("@currentID", currentID);
             
             reader = cmd.ExecuteReader();
