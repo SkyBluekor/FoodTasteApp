@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using MySql.Data.MySqlClient;
@@ -341,7 +341,7 @@ public class CardPickSearch : MonoBehaviour
             }
             reader.Close();
 
-            cmd = new MySqlCommand("select fooddata.foodname, ROUND(IFNULL(AVG(foodtastescore.foodscore), 0), 1) as avg_score from fooddata left join foodtastescore on fooddata.foodname = foodtastescore.foodname group by fooddata.foodname", conn);
+            cmd = new MySqlCommand("select fooddata.foodname, ROUND(IFNULL(AVG(foodtastescore.foodscore), 0), 1) as avg_score from fooddata left join foodtastescore on fooddata.foodname COLLATE utf8mb4_unicode_ci = foodtastescore.foodname COLLATE utf8mb4_unicode_ci group by fooddata.foodname", conn);
             reader = cmd.ExecuteReader();
             while(reader.Read())
             {
