@@ -13,7 +13,6 @@ public class CardPickSearch : MonoBehaviour
     public GameObject cardMoveObj;
     public Button ShakeBtn, ExitBtn, RandomPickBtn, RefreshBtn;
     public GameObject[] CardPreFab = new GameObject[5]; 
-    private List<Vector3> CardVec3 = new List<Vector3>();
     private GameObject[] CardSpawnPrefabs;
     public GameObject ScrollView;
     public TMP_Dropdown TmpDropdown;
@@ -89,37 +88,15 @@ public class CardPickSearch : MonoBehaviour
             spawnVec3.Add(position);
         }
 
-        float CardPosX, CardPosY, CardPosZ;
-        
-        for (int i = 0; i < 5; i++)
-        {
-            CardPosX = -700;
-            CardPosY = 300;
-            CardPosZ = 0;
-            CardPosX = CardPosX + (370 * i);
-            Vector3 position = new Vector3(CardPosX, CardPosY, CardPosZ);
-            CardVec3.Add(position);
-        }
+    }
 
-        for(int i = 0; i < 4; i++)
-        {
-            CardPosX = -630;
-            CardPosY = -200;
-            CardPosZ = 0;
-            CardPosX = CardPosX + (400 * i);
-            if (i == 2)
-            {
-                CardPosX = 230;
-            }
-            if(i == 3)
-            {
-                CardPosX = 630;
-            }
-            Vector3 position = new Vector3(CardPosX,CardPosY,CardPosZ);
-            CardVec3.Add(position);
-        }
-        
-
+    private Vector3 CardPosition(int index, int count)
+    {
+        int row = index / 3;
+        int rows = (count + 2) / 3;
+        int itemsInRow = Mathf.Min(3, count - row * 3);
+        return new Vector3((index % 3 - (itemsInRow - 1) * 0.5f) * 430f,
+            ((rows - 1) * 0.5f - row) * 270f, 0f);
     }
     private void RefreshBtnFunc()
     {
@@ -137,8 +114,8 @@ public class CardPickSearch : MonoBehaviour
             spawnedPrefabs[i].transform.localPosition = spawnVec3[i];
 
             GameObject prefab = CardPreFab[Random.Range(0, CardPreFab.Length)];
-            CardSpawnPrefabs[i] = Instantiate(prefab, CardVec3[i], Quaternion.Euler(0, 0, 0), CardPanel.transform);
-            CardSpawnPrefabs[i].transform.localPosition = CardVec3[i];
+            CardSpawnPrefabs[i] = Instantiate(prefab, CardPanel.transform);
+            CardSpawnPrefabs[i].transform.localPosition = CardPosition(i, count);
         }
 
         cardMoveFunc.StopAllCoroutines();
@@ -179,8 +156,8 @@ public class CardPickSearch : MonoBehaviour
             spawnedPrefabs[i].transform.localPosition = spawnVec3[i];
 
             GameObject prefab = CardPreFab[Random.Range(0,CardPreFab.Length)];
-            CardSpawnPrefabs[i] = Instantiate(prefab, CardVec3[i],Quaternion.Euler(0,0,0),CardPanel.transform);
-            CardSpawnPrefabs[i].transform.localPosition = CardVec3[i];
+            CardSpawnPrefabs[i] = Instantiate(prefab, CardPanel.transform);
+            CardSpawnPrefabs[i].transform.localPosition = CardPosition(i, count);
         }
         cardMoveFunc.StopAllCoroutines();
         cardMoveFunc.CancelInvoke("DestroyCardObj");

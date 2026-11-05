@@ -1,154 +1,121 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class CardMoveFunc : MonoBehaviour
 {
-    public Button CardPickBtn, randomPickBtn,RefreshBtn;
+    public Button CardPickBtn, randomPickBtn, RefreshBtn;
     public GameObject cardPanel;
     public float time;
     public GameObject WarningImg;
     public TMP_Dropdown Food_Dropdown;
     public TMP_InputField Food_Search;
-
-    private Vector3 lastPos;
-    private float moveSpeed = 1000f;
     public List<Transform> cardList;
 
-    // Start is called before the first frame update
+    private const float MoveSpeed = 1000f;
+    private const float EdgePadding = 65f;
+    private Transform selectedCard;
+
     private void Start()
     {
-
-        lastPos = new Vector3(0f,0f,0f);
         CardPickBtn.onClick.AddListener(PickRandomCard);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void PickRandomCard()
     {
         cardList = new List<Transform>();
-        for (int i = 0; i < cardPanel.transform.childCount; i++)
+        foreach (Transform card in cardPanel.transform)
         {
-            Transform card = cardPanel.transform.GetChild(i);
-            cardList.Add(card);
-        }
-        Debug.Log("Card List ����" + cardList.Count);
-        time = cardList.Count;
-        Debug.Log("timex  " + time);
-
-        foreach (Transform card in cardList) 
-        { 
-            Debug.Log("cardName" + card.gameObject.GetComponentInChildren<TextMeshProUGUI>().text);
-            if(card.gameObject.GetComponentInChildren<TextMeshProUGUI>().text == "")
+            TextMeshProUGUI label = card.GetComponentInChildren<TextMeshProUGUI>();
+            if (label == null || string.IsNullOrWhiteSpace(label.text))
             {
                 StartCoroutine(ShowWarning(2f));
                 return;
             }
+            cardList.Add(card);
         }
-        for (int i = 0;i < cardList.Count;i++)
-        {
-            float x = Random.Range(-cardPanel.GetComponent<RectTransform>().rect.width / 2, cardPanel.GetComponent<RectTransform>().rect.width / 2);
-            float y = Random.Range(-cardPanel.GetComponent<RectTransform>().rect.height / 2, cardPanel.GetComponent<RectTransform>().rect.height / 2);
-            Vector3 targetPos = new Vector3(x, y, 0f);
-            if (cardList[0].transform.localPosition != lastPos)
-                StartCoroutine(MoveToPos(cardList[i],targetPos));
-        }
-        InvokeRepeating("DestroyCardObj",0f,1f);
+        if (cardList.Count == 0)
+            return;
 
+        StartCoroutine(ShuffleCards());
     }
 
-    IEnumerator ShowWarning(float seconds)
+    private IEnumerator ShowWarning(float seconds)
     {
-        WarningImg.SetActive (true);
+        WarningImg.SetActive(true);
         yield return new WaitForSeconds(seconds);
-        WarningImg.SetActive (false);
-
+        WarningImg.SetActive(false);
     }
 
-    IEnumerator MoveToPos(Transform obj, Vector3 targetPos)
+    private void SetControlsEnabled(bool enabled)
     {
-        CardPickBtn.interactable = false;
-        randomPickBtn.interactable = false;
-        Food_Dropdown.interactable = false;
-        RefreshBtn.interactable = false;
-        Food_Search.interactable = false;
-        float startTime = Time.time;
-        while (obj != null && obj.transform.localPosition != targetPos )
-        {
-            obj.transform.localPosition = Vector3.MoveTowards(obj.transform.localPosition, targetPos, moveSpeed * Time.deltaTime);
-            if(obj.transform.localPosition == targetPos) 
-            { 
-                float endTime = Time.time;
-                Debug.Log("Start TIme" + startTime + "EndTIme" + endTime + "s -e " + (endTime - startTime));
-                Debug.Log("timey  " + time);
-                if (endTime - startTime < time) 
-                {
-                    float x = Random.Range(-cardPanel.GetComponent<RectTransform>().rect.width / 2, cardPanel.GetComponent<RectTransform>().rect.width / 2);
-                    float y = Random.Range(-cardPanel.GetComponent<RectTransform>().rect.height / 2, cardPanel.GetComponent<RectTransform>().rect.height / 2);
-                    Vector3 newTargetPos = new Vector3(x, y, 0f);
-                    obj.transform.localPosition = Vector3.MoveTowards(obj.transform.localPosition,newTargetPos,moveSpeed * Time.deltaTime);
-                    targetPos = newTargetPos;
-                }
-                else
-                {
+        CardPickBtn.interactable = enabled;
+        randomPickBtn.interactable = enabled;
+        Food_Dropdown.interactable = enabled;
+        RefreshBtn.interactable = enabled;
+        Food_Search.interactable = enabled;
+    }
 
-                    StartCoroutine(MoveEndCard());
-                    yield break;
-                }
+    private Vector3 RandomPosition(Transform card)
+    {
+        Rect bounds = ((RectTransform)cardPanel.transform).rect;
+        RectTransform rect = (RectTransform)card;
+        float halfWidth = rect.rect.width * Mathf.Abs(rect.localScale.x) * 0.5f;
+        float halfHeight = rect.rect.height * Mathf.Abs(rect.localScale.y) * 0.5f;
+        float minX = bounds.xMin + halfWidth + EdgePadding;
+        float maxX = bounds.xMax - halfWidth - EdgePadding;
+        float minY = bounds.yMin + halfHeight + EdgePadding;
+        float maxY = bounds.yMax - halfHeight - EdgePadding;
+        return new Vector3(minX <= maxX ? Random.Range(minX, maxX) : bounds.center.x,
+            minY <= maxY ? Random.Range(minY, maxY) : bounds.center.y, 0f);
+    }
+
+    private IEnumerator ShuffleCards()
+    {
+        SetControlsEnabled(false);
+        var targets = new Dictionary<Transform, Vector3>();
+        foreach (Transform card in cardList)
+            targets[card] = RandomPosition(card);
+
+        float nextRemoval = Time.time + 1f;
+        while (cardList.Count > 1)
+        {
+            foreach (Transform card in cardList)
+            {
+                card.localPosition = Vector3.MoveTowards(card.localPosition, targets[card], MoveSpeed * Time.deltaTime);
+                if (Vector3.Distance(card.localPosition, targets[card]) < 0.01f)
+                    targets[card] = RandomPosition(card);
+            }
+            if (Time.time >= nextRemoval)
+            {
+                int index = Random.Range(0, cardList.Count);
+                Transform removed = cardList[index];
+                cardList.RemoveAt(index);
+                targets.Remove(removed);
+                Destroy(removed.gameObject);
+                nextRemoval = Time.time + 1f;
             }
             yield return null;
         }
-    }
 
-    IEnumerator MoveEndCard()
-    {
-        if (cardList != null)
+        Transform winner = cardList[0];
+        Vector3 center = ((RectTransform)cardPanel.transform).rect.center;
+        while (winner != null && Vector3.Distance(winner.localPosition, center) > 0.01f)
         {
-            while (cardList[0].transform.localPosition != lastPos)
-                {
-                    if (cardList[0] != null)
-                    {
-                        cardList[0].transform.localPosition = Vector3.MoveTowards(cardList[0].transform.localPosition, lastPos, moveSpeed * Time.deltaTime);
-                        if (cardList[0].transform.localPosition == lastPos)
-                        {
-                            yield return new WaitForEndOfFrame();
-                            if (Vector3.Distance(cardList[0].transform.localPosition, lastPos) <= 0.01f)
-                            {
-                                cardList[0].transform.localScale = new Vector3(2f, 2f, 1f);
-                                yield break;
-                            }
-                        }
-                    }
-                    CardPickBtn.interactable = true;
-                    randomPickBtn.interactable = true;
-                    Food_Dropdown.interactable = true;
-                    RefreshBtn.interactable = true;
-                    Food_Search.interactable = true;
-                    yield return null;
-                }
+            winner.localPosition = Vector3.MoveTowards(winner.localPosition, center, MoveSpeed * Time.deltaTime);
+            yield return null;
         }
+        if (winner != null)
+        {
+            winner.localPosition = center;
+            if (winner != selectedCard)
+            {
+                winner.localScale = new Vector3(winner.localScale.x * 2f, winner.localScale.y * 2f, winner.localScale.z);
+                selectedCard = winner;
+            }
+        }
+        SetControlsEnabled(true);
     }
-
-    private void DestroyCardObj()
-    {
-        if(cardList.Count > 1)
-        {
-            int randomindex = Random.Range(0,cardList.Count);
-            Destroy(cardList[randomindex].gameObject); 
-            cardList.RemoveAt(randomindex);
-        }
-        else if (cardList.Count == 1)
-        {
-            StopCoroutine("DestroyCardObj");
-        }
-    }
-    
-
 }

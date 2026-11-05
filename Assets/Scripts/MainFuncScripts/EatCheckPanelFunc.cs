@@ -24,13 +24,18 @@ public class EatCheckPanelFunc : MonoBehaviour
     public Transform PreFabParentTransform;
     public UnityEngine.UI.Button ExitBtn , TotalCountBtn, CheckEatenDayBtn;
     private List<GameObject> EatenFoodPrefabList = new List<GameObject>();
+    private bool showingOldest;
+    private const float FoodRowHeight = 82f;
+    private const float FoodRowSpacing = 8f;
     public GameObject FoodCheckMessage, ScrollView;
     // Start is called before the first frame update
     void Start()
     {
         CurrentId = PlayerPrefs.GetString("playerid");
+        ConfigureFoodList();
+        ConfigureFoodCheckMessage();
         TextMeshProUGUI GetTextCount = TotalCountBtn.GetComponentInChildren<TextMeshProUGUI>();
-        GetTextCount.color = Color.yellow;
+        GetTextCount.color = new Color(0.65f, 0.25f, 0.03f);
         SettingBackGround();
         GetDropdownOption();
 
@@ -64,9 +69,10 @@ public class EatCheckPanelFunc : MonoBehaviour
 
     private void TotalEatenBtnFunc()
     {
+        showingOldest = false;
         HeadText.text = "내가 자주먹은 음식";
         TextMeshProUGUI GetTextCount = TotalCountBtn.GetComponentInChildren<TextMeshProUGUI>();
-        GetTextCount.color = Color.yellow;
+        GetTextCount.color = new Color(0.65f, 0.25f, 0.03f);
         TextMeshProUGUI GetTextCheck = CheckEatenDayBtn.GetComponentInChildren<TextMeshProUGUI>();
         GetTextCheck.color = Color.black;
         ShowEatenPreFab(RefreshEatenCount());
@@ -75,11 +81,12 @@ public class EatCheckPanelFunc : MonoBehaviour
     }
     private void CheckEatenDayBtnFunc()
     {
+        showingOldest = true;
         HeadText.text = "먹은지 오래된 음식";
         TextMeshProUGUI GetTextCount = TotalCountBtn.GetComponentInChildren<TextMeshProUGUI>();
         GetTextCount.color = Color.black;
         TextMeshProUGUI GetTextCheck = CheckEatenDayBtn.GetComponentInChildren<TextMeshProUGUI>();
-        GetTextCheck.color = Color.yellow;
+        GetTextCheck.color = new Color(0.65f, 0.25f, 0.03f);
         ShowCheckEatenPrefab(RefreshCheckEatenList());
         ScrollRect scrollRect = ScrollView.GetComponentInChildren<ScrollRect>();
         scrollRect.content.anchoredPosition = new Vector2(scrollRect.content.anchoredPosition.x, 0);
@@ -87,6 +94,7 @@ public class EatCheckPanelFunc : MonoBehaviour
 
     private void ShowCheckEatenPrefab( List<(string,string)> CheckEatenList)
     {
+        ResizeFoodList(CheckEatenList.Count);
         foreach (GameObject g in EatenFoodPrefabList)
         {
             Destroy(g);
@@ -100,7 +108,7 @@ public class EatCheckPanelFunc : MonoBehaviour
             {
                 GameObject item = Instantiate(EatenFoodPrefab);
                 item.transform.SetParent(PreFabParentTransform, false);
-                item.transform.localPosition = new Vector3(0, -i * 100, 0);
+                PositionFoodRow(item, i);
                 textmeshes.AddRange(item.GetComponentsInChildren<TextMeshProUGUI>());
                 EatenFoodPrefabList.Add(item);
 
@@ -114,6 +122,7 @@ public class EatCheckPanelFunc : MonoBehaviour
 
     private void ShowEatenPreFab (List<(string,int)> countEatenList)
     {
+        ResizeFoodList(countEatenList.Count);
         foreach (GameObject g in EatenFoodPrefabList)
         {
             Destroy(g);
@@ -127,22 +136,131 @@ public class EatCheckPanelFunc : MonoBehaviour
             {
                 GameObject item = Instantiate(EatenFoodPrefab);
                 item.transform.SetParent(PreFabParentTransform, false);
-                item.transform.localPosition = new Vector3(0, -i * 100, 0);
+                PositionFoodRow(item, i);
                 textmeshes.AddRange(item.GetComponentsInChildren<TextMeshProUGUI>());
                 EatenFoodPrefabList.Add(item);
 
                 textmeshes[0].text = countEatenList[i].Item1;
-                textmeshes[1].text = textmeshes[1].text + countEatenList[i].Item2.ToString()+"회";
+                textmeshes[1].text = countEatenList[i].Item2.ToString() + "회";
 
                 textmeshes.Clear();
             }
         }
     }
+
+    private void ConfigureFoodList()
+    {
+        var scroll = ScrollView.GetComponent<ScrollRect>();
+        // AutoHideAndExpandViewport drives the viewport rect back to full size,
+        // overwriting the insets needed to keep rows inside the artwork.
+        scroll.horizontalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        var viewport = scroll.viewport;
+        var mask = viewport.GetComponent<Mask>();
+        if (mask != null) mask.enabled = false;
+        if (viewport.GetComponent<RectMask2D>() == null)
+            viewport.gameObject.AddComponent<RectMask2D>();
+        viewport.anchorMin = Vector2.zero;
+        viewport.anchorMax = Vector2.one;
+        viewport.offsetMin = new Vector2(65, 60);
+        viewport.offsetMax = new Vector2(-65, -105);
+
+        var content = (RectTransform)PreFabParentTransform;
+        var fitter = content.GetComponent<ContentSizeFitter>();
+        if (fitter != null) fitter.enabled = false;
+        var layout = content.GetComponent<VerticalLayoutGroup>();
+        if (layout != null) layout.enabled = false;
+        content.anchorMin = new Vector2(0, 1);
+        content.anchorMax = Vector2.one;
+        content.pivot = new Vector2(.5f, 1);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = Vector2.zero;
+        scroll.horizontal = false;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+    }
+
+    public void ConfigureFoodCheckMessage()
+    {
+        Transform header = FoodCheckMessage.transform.Find("Image");
+        Transform body = FoodCheckMessage.transform.Find("Text (TMP)");
+        if (header != null)
+        {
+            Image headerBackground = header.GetComponent<Image>();
+            if (headerBackground != null) headerBackground.enabled = false;
+            var rect = (RectTransform)header;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = new Vector2(75, 26);
+            rect.sizeDelta = new Vector2(470, 38);
+            var title = header.GetComponentInChildren<TextMeshProUGUI>(true);
+            if (title != null)
+            {
+                title.color = new Color(.35f, .17f, .07f, 1f);
+                title.alignment = TextAlignmentOptions.Center;
+                title.enableAutoSizing = true;
+                title.fontSizeMin = 16;
+                title.fontSizeMax = 29;
+                var titleRect = title.rectTransform;
+                titleRect.anchorMin = Vector2.zero;
+                titleRect.anchorMax = Vector2.one;
+                titleRect.offsetMin = titleRect.offsetMax = Vector2.zero;
+            }
+        }
+        if (body != null)
+        {
+            var rect = (RectTransform)body;
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(.5f, .5f);
+            rect.anchoredPosition = new Vector2(75, -22);
+            rect.sizeDelta = new Vector2(470, 65);
+            var text = body.GetComponent<TextMeshProUGUI>();
+            if (text != null) { text.enableWordWrapping = true; text.alignment = TextAlignmentOptions.Center; }
+        }
+    }
+
+    private void ResizeFoodList(int count)
+    {
+        var content = (RectTransform)PreFabParentTransform;
+        content.sizeDelta = new Vector2(0, Mathf.Max(count * (FoodRowHeight + FoodRowSpacing), 1f));
+    }
+
+    private static void PositionFoodRow(GameObject item, int index)
+    {
+        var row = (RectTransform)item.transform;
+        row.anchorMin = new Vector2(0, 1);
+        row.anchorMax = new Vector2(1, 1);
+        row.pivot = new Vector2(.5f, .5f);
+        row.sizeDelta = new Vector2(-12, FoodRowHeight);
+        row.anchoredPosition = new Vector2(0, -FoodRowHeight * .5f - index * (FoodRowHeight + FoodRowSpacing));
+        FitFoodRowLabel(row.Find("EatenFoodName") as RectTransform, .22f, .70f);
+        FitFoodRowLabel(row.Find("CountEatenFood") as RectTransform, .70f, .97f);
+    }
+
+    private static void FitFoodRowLabel(RectTransform label, float left, float right)
+    {
+        if (label == null) return;
+        label.anchorMin = new Vector2(left, 0);
+        label.anchorMax = new Vector2(right, 1);
+        label.offsetMin = new Vector2(4, 12);
+        label.offsetMax = new Vector2(-4, -12);
+        var text = label.GetComponent<TextMeshProUGUI>();
+        if (text != null)
+        {
+            text.enableWordWrapping = false;
+            text.enableAutoSizing = true;
+            text.fontSizeMin = 14;
+            text.fontSizeMax = 25;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+        }
+    }
+
+    private void RefreshCurrentList()
+    {
+        if (showingOldest) ShowCheckEatenPrefab(RefreshCheckEatenList());
+        else ShowEatenPreFab(RefreshEatenCount());
+    }
     private void SettingBackGround()
     {
         MySqlConnection conn = new MySqlConnection(connStr);
         MySqlCommand cmd = new MySqlCommand();
-        conn.Open();
         List<(string,int)> CountEatenList = new List<(string,int)>();
         List<(string, string)> TodayEaten = new List<(string, string)>();
         List<(string, string)> CheckDayEatenList = new List<(string, string)>();
@@ -151,6 +269,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         NightImg = NightInputBtn.GetComponent<Image>();
         try 
         { 
+            conn.Open();
             cmd = new MySqlCommand("select foodname, count(*) as count from search_history where user_id = @currentid and  tag = 'eaten' group by foodname order by count desc",conn);
             cmd.Parameters.AddWithValue("@currentid", CurrentId);
             MySqlDataReader reader = cmd.ExecuteReader();
@@ -164,7 +283,8 @@ public class EatCheckPanelFunc : MonoBehaviour
             ShowEatenPreFab(CountEatenList);
             reader.Close();
 
-            cmd = new MySqlCommand("select foodname,eaten_tag from search_history where search_date = current_date() and eaten_tag in ('morning', 'afternoon', 'night') order by field(eaten_tag, 'morning', 'afternoon', 'night')", conn);
+            cmd = new MySqlCommand("select foodname,eaten_tag from search_history where user_id = @currentid and tag = 'eaten' and search_date = current_date() and eaten_tag in ('morning', 'afternoon', 'night') order by field(eaten_tag, 'morning', 'afternoon', 'night')", conn);
+            cmd.Parameters.AddWithValue("@currentid", CurrentId);
             reader = cmd.ExecuteReader();
             while(reader.Read())
             {
@@ -223,7 +343,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         MySqlCommand cmd = new MySqlCommand();
         if (BtnName == "MorningInput")
         {
-            if(FoodOptions.Contains(MorningText.text))
+            if(TryResolveFoodName(MorningText))
             {
                 try
                 {
@@ -233,7 +353,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                     cmd.Parameters.AddWithValue("@foodname",MorningText.text);
                     cmd.Parameters.AddWithValue("@currentTime",todaydate);
                     cmd.ExecuteNonQuery();
-                    ShowEatenPreFab(RefreshEatenCount());
+                    RefreshCurrentList();
 
                     MorningText.readOnly = true;
                     MorningInputBtn.interactable = false;
@@ -257,7 +377,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         }
         else if (BtnName == "AfterNoonInput")
         {
-            if (FoodOptions.Contains(AfterNoonText.text))
+            if (TryResolveFoodName(AfterNoonText))
             {
                 try
                 {
@@ -267,7 +387,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                     cmd.Parameters.AddWithValue("@foodname", AfterNoonText.text);
                     cmd.Parameters.AddWithValue("@currentTime", todaydate);
                     cmd.ExecuteNonQuery();
-                    ShowEatenPreFab(RefreshEatenCount());
+                    RefreshCurrentList();
 
                     AfterNoonText.readOnly = true;
                     AfterNoonInputBtn.interactable = false;
@@ -291,7 +411,7 @@ public class EatCheckPanelFunc : MonoBehaviour
         }
         else if (BtnName == "NightInput")
         {
-            if (FoodOptions.Contains(NightText.text))
+            if (TryResolveFoodName(NightText))
             {
                 try
                 {
@@ -301,7 +421,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                     cmd.Parameters.AddWithValue("@foodname", NightText.text);
                     cmd.Parameters.AddWithValue("@currentTime", todaydate);
                     cmd.ExecuteNonQuery();
-                    ShowEatenPreFab(RefreshEatenCount());
+                    RefreshCurrentList();
 
                     NightText.readOnly = true;
                     NightInputBtn.interactable = false;
@@ -403,7 +523,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                     cmd.Parameters.AddWithValue("@today", todaydate);
                     cmd.ExecuteNonQuery();
 
-                    ShowEatenPreFab(RefreshEatenCount());
+                    RefreshCurrentList();
                     MorningText.text = "";
                     MorningText.readOnly = false;
                     MorningInputBtn.interactable = true;
@@ -426,7 +546,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                     cmd.Parameters.AddWithValue("@foodname", AfterNoonText.text);
                     cmd.Parameters.AddWithValue("@today", todaydate);
                     cmd.ExecuteNonQuery();
-                    ShowEatenPreFab(RefreshEatenCount());
+                    RefreshCurrentList();
 
                     AfterNoonText.text = "";
                     AfterNoonText.readOnly = false;
@@ -449,7 +569,7 @@ public class EatCheckPanelFunc : MonoBehaviour
                     cmd.Parameters.AddWithValue("@foodname", NightText.text);
                     cmd.Parameters.AddWithValue("@today", todaydate);
                     cmd.ExecuteNonQuery();
-                    ShowEatenPreFab(RefreshEatenCount());
+                    RefreshCurrentList();
 
                     NightText.text = "";
                     NightText.readOnly = false;
@@ -519,54 +639,56 @@ public class EatCheckPanelFunc : MonoBehaviour
         AfterNoonDropDown.gameObject.SetActive(false);
         NightDropDown.gameObject.SetActive(true);
     }
-    private void UpdateMorningDropDownOptions(TMP_InputField inputField, TMP_Dropdown dropdown)
-    {
-        string inputText = inputField.text.ToLower();
-        dropdown.ClearOptions();
+    private bool updatingFoodOptions;
 
-        List<string> FilterOption = FoodOptions.FindAll(option => option.ToLower().Contains(inputText));
-        MorningDropDown.options.Insert(0, new TMP_Dropdown.OptionData("음식을 선택해주세요."));
-        MorningDropDown.AddOptions(FilterOption);
-    }
-    private void UpdateAfterNoonDropDownOptions(TMP_InputField inputField, TMP_Dropdown dropdown)
+    private bool TryResolveFoodName(TMP_InputField input)
     {
-        string inputText = inputField.text.ToLower();
-        dropdown.ClearOptions();
+        string entered = input.text.Trim();
+        string match = FoodOptions.Find(option =>
+            string.Equals(option.Trim(), entered, StringComparison.OrdinalIgnoreCase));
+        if (match == null) return false;
+        input.SetTextWithoutNotify(match);
+        return true;
+    }
 
-        List<string> FilterOption = FoodOptions.FindAll(option => option.ToLower().Contains(inputText));
-        AfterNoonDropDown.options.Insert(0, new TMP_Dropdown.OptionData("음식을 선택해주세요."));
-        AfterNoonDropDown.AddOptions(FilterOption);
-    }
-    private void UpdateNightDropDownOptions(TMP_InputField inputField, TMP_Dropdown dropdown)
+    private void UpdateFoodDropDownOptions(TMP_InputField input, TMP_Dropdown dropdown)
     {
-        string inputText = inputField.text.ToLower();
-        dropdown.ClearOptions();
-
-        List<string> FilterOption = FoodOptions.FindAll(option => option.ToLower().Contains(inputText));
-        NightDropDown.options.Insert(0, new TMP_Dropdown.OptionData("음식을 선택해주세요."));
-        NightDropDown.AddOptions(FilterOption);
-    }
-    private void DropDownFunc(TMP_Dropdown CurrentDropdown)
-    {
-        if(CurrentDropdown == MorningDropDown) 
+        updatingFoodOptions = true;
+        try
         {
-            MorningText.text = MorningDropDown.options[MorningDropDown.value].text;
-            MorningDropDown.gameObject.SetActive(false);
+            string query = input.text.Trim();
+            var matches = FoodOptions.FindAll(option =>
+                option.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0);
+            dropdown.ClearOptions();
+            dropdown.options.Add(new TMP_Dropdown.OptionData("음식을 선택해주세요."));
+            dropdown.AddOptions(matches);
+            dropdown.SetValueWithoutNotify(0);
+            dropdown.RefreshShownValue();
         }
-        else if(CurrentDropdown == AfterNoonDropDown)
-        {
-            AfterNoonText.text = AfterNoonDropDown.options[AfterNoonDropDown.value].text;
-            AfterNoonDropDown.gameObject.SetActive(false) ;
-        }
-        else if(CurrentDropdown == NightDropDown) 
-        {
-            NightText.text = NightDropDown.options[NightDropDown.value].text;
-            NightDropDown.gameObject.SetActive(false) ;
-
-        }
-
+        finally { updatingFoodOptions = false; }
     }
 
+    private void UpdateMorningDropDownOptions(TMP_InputField input, TMP_Dropdown dropdown)
+    {
+        UpdateFoodDropDownOptions(input, dropdown);
+    }
+    private void UpdateAfterNoonDropDownOptions(TMP_InputField input, TMP_Dropdown dropdown)
+    {
+        UpdateFoodDropDownOptions(input, dropdown);
+    }
+    private void UpdateNightDropDownOptions(TMP_InputField input, TMP_Dropdown dropdown)
+    {
+        UpdateFoodDropDownOptions(input, dropdown);
+    }
+    private void DropDownFunc(TMP_Dropdown dropdown)
+    {
+        if (updatingFoodOptions || dropdown.value <= 0 || dropdown.value >= dropdown.options.Count)
+            return;
+        TMP_InputField input = dropdown == MorningDropDown ? MorningText :
+            dropdown == AfterNoonDropDown ? AfterNoonText : NightText;
+        input.SetTextWithoutNotify(dropdown.options[dropdown.value].text);
+        dropdown.gameObject.SetActive(false);
+    }
     private void GetDropdownOption()
     {
         MySqlConnection conn = new MySqlConnection(connStr);
