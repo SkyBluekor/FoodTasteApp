@@ -6,10 +6,9 @@ using UnityEngine;
 public class UpDownManager : MonoBehaviour
 {
     public GameObject SunObj,MoonObj;
-    private Vector3 speed = new Vector3(0f,700f,0f);
-    private float distance = 780f;
-    private float startingY = -390f;
-    private float endY = 390f;
+    private Vector3 speed = new Vector3(0f,120f,0f);
+    private float startingY = -210f;
+    private float endY = 210f;
     private bool MoveDirection = true;
     // Start is called before the first frame update
     void Start()

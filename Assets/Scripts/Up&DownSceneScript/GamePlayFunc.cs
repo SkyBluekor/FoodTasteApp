@@ -33,8 +33,12 @@ public class GamePlayFunc : MonoBehaviour
     private int currentItem1Index = 0, currentItem2Index = 0;
     private ItemIndex stage;
     private Coroutine timeCoroutine;
+    private bool gameEnding;
+    private TextMeshProUGUI resultText;
     private void Awake()
     {
+        Transform result = GameOverPanel.transform.Find("ResultBackground/ResultScore");
+        resultText = result != null ? result.GetComponent<TextMeshProUGUI>() : null;
         textMeshProUGUIs = new List<TextMeshProUGUI>();
         stage = new ItemIndex();
         textMeshProUGUIs.Add(LeftFoodScoreText);
@@ -42,20 +46,177 @@ public class GamePlayFunc : MonoBehaviour
         textMeshProUGUIs.Add(RightFoodscoreText);
         textMeshProUGUIs.Add(RightFoodScore);
     }
+
+#if UNITY_EDITOR
+    public void ApplySceneLayout()
+    {
+        ConfigureGameOverRanking();
+        ConfigureFoodCardText(LeftFoodImg, "LeftFoodName", LeftFoodScoreText, LeftFoodScore);
+        ConfigureFoodCardText(RightFoodImg, "RightFoodName", RightFoodscoreText, RightFoodScore);
+    }
+
+    private static void ConfigureFoodCardText(Image food, string nameObject, TMP_Text caption, TMP_Text score)
+    {
+        Transform nameTransform = food.transform.Find(nameObject);
+        if (nameTransform != null)
+        {
+            TMP_Text name = nameTransform.GetComponent<TMP_Text>();
+            if (name != null)
+            {
+                name.rectTransform.anchoredPosition = new Vector2(0f, -295f);
+                name.rectTransform.sizeDelta = new Vector2(350f, 45f);
+                name.enableAutoSizing = true;
+                name.fontSizeMin = 18f;
+                name.fontSizeMax = 34f;
+                name.alignment = TextAlignmentOptions.Center;
+                name.enableWordWrapping = false;
+            }
+        }
+        caption.text = "";
+        score.rectTransform.anchoredPosition = new Vector2(0f, -345f);
+        score.rectTransform.sizeDelta = new Vector2(320f, 42f);
+        score.enableAutoSizing = true;
+        score.fontSizeMin = 18f;
+        score.fontSizeMax = 30f;
+        score.alignment = TextAlignmentOptions.Center;
+        score.enableWordWrapping = false;
+    }
+
+    private void ConfigureGameOverRanking()
+    {
+        RectTransform panel = GameOverPanel.transform as RectTransform;
+        if (panel == null || panel.Find("RankingScroll") != null) return;
+        Transform oldTitle = panel.Find("Image/OverPanelTitle");
+        if (oldTitle != null) oldTitle.gameObject.SetActive(false);
+
+        GameObject resultBackground = new GameObject("ResultBackground", typeof(RectTransform), typeof(Image));
+        RectTransform backgroundRect = (RectTransform)resultBackground.transform;
+        backgroundRect.SetParent(panel, false);
+        backgroundRect.anchorMin = backgroundRect.anchorMax = backgroundRect.pivot = new Vector2(0.5f, 0.5f);
+        backgroundRect.anchoredPosition = new Vector2(0f, 150f);
+        backgroundRect.sizeDelta = new Vector2(690f, 78f);
+        Image resultImage = resultBackground.GetComponent<Image>();
+        resultImage.color = new Color(1f, 0.95f, 0.85f, 0.96f);
+        resultImage.raycastTarget = false;
+        GameObject resultObject = new GameObject("ResultScore", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        RectTransform resultRect = (RectTransform)resultObject.transform;
+        resultRect.SetParent(backgroundRect, false);
+        resultRect.anchorMin = Vector2.zero;
+        resultRect.anchorMax = Vector2.one;
+        resultRect.offsetMin = new Vector2(10f, 4f);
+        resultRect.offsetMax = new Vector2(-10f, -4f);
+        resultText = resultObject.GetComponent<TextMeshProUGUI>();
+        resultText.font = Text_1st.font;
+        resultText.fontSharedMaterial = Text_1st.fontSharedMaterial;
+        resultText.fontSize = 28f;
+        resultText.enableAutoSizing = true;
+        resultText.fontSizeMin = 18f;
+        resultText.fontSizeMax = 28f;
+        resultText.alignment = TextAlignmentOptions.Center;
+        resultText.color = new Color(0.35f, 0.15f, 0.07f);
+        resultText.raycastTarget = false;
+        resultText.text = "이번 점수 0점\n최고 기록 0점 · 기록 유지";
+
+        // The panel artwork has two button-shaped spaces below the ranking area.
+        RectTransform replay = ReplayBtn.transform as RectTransform;
+        RectTransform exit = GameExitBtn.transform as RectTransform;
+        replay.anchoredPosition = new Vector2(-205f, -280f);
+        exit.anchoredPosition = new Vector2(205f, -280f);
+        replay.sizeDelta = exit.sizeDelta = new Vector2(410f, 150f);
+
+        GameObject scrollObject = new GameObject("RankingScroll", typeof(RectTransform), typeof(Image), typeof(ScrollRect));
+        RectTransform scrollRect = (RectTransform)scrollObject.transform;
+        scrollRect.SetParent(panel, false);
+        scrollRect.anchorMin = scrollRect.anchorMax = scrollRect.pivot = new Vector2(0.5f, 0.5f);
+        scrollRect.anchoredPosition = new Vector2(0f, -40f);
+        scrollRect.sizeDelta = new Vector2(760f, 280f);
+        Image hitArea = scrollObject.GetComponent<Image>();
+        hitArea.color = Color.clear;
+
+        GameObject viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(RectMask2D));
+        RectTransform viewport = (RectTransform)viewportObject.transform;
+        viewport.SetParent(scrollRect, false);
+        viewport.anchorMin = Vector2.zero;
+        viewport.anchorMax = Vector2.one;
+        viewport.offsetMin = new Vector2(0f, 0f);
+        viewport.offsetMax = new Vector2(-24f, 0f);
+
+        GameObject contentObject = new GameObject("Content", typeof(RectTransform));
+        RectTransform content = (RectTransform)contentObject.transform;
+        content.SetParent(viewport, false);
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = new Vector2(0f, 616f);
+
+        string[] ranks = { "1st", "2nd", "3rd", "4th", "5th", "6th", "7th" };
+        TextMeshProUGUI[] names = { Text_1st, Text_2nd, Text_3rd, Text_4th, Text_5th, Text_6th, Text_7th };
+        for (int i = 0; i < ranks.Length; i++)
+        {
+            float y = -44f - 88f * i;
+            Transform row = panel.Find("RankingRow_" + (i + 1));
+            Transform badge = panel.Find(ranks[i] + "img");
+            PlaceRankingElement(row, content, new Vector2(0f, y));
+            if (row != null) ((RectTransform)row).sizeDelta = new Vector2(650f, 160f);
+            PlaceRankingElement(badge, content, new Vector2(-270f, y));
+            PlaceRankingElement(names[i].transform, content, new Vector2(-45f, y));
+        }
+
+        GameObject barObject = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        RectTransform barRect = (RectTransform)barObject.transform;
+        barRect.SetParent(scrollRect, false);
+        barRect.anchorMin = new Vector2(1f, 0f);
+        barRect.anchorMax = new Vector2(1f, 1f);
+        barRect.pivot = new Vector2(1f, 0.5f);
+        barRect.offsetMin = new Vector2(-13f, 8f);
+        barRect.offsetMax = new Vector2(-5f, -8f);
+        barObject.GetComponent<Image>().color = new Color(0.75f, 0.43f, 0.19f, 0.25f);
+        GameObject handleObject = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        RectTransform handle = (RectTransform)handleObject.transform;
+        handle.SetParent(barRect, false);
+        handle.anchorMin = Vector2.zero;
+        handle.anchorMax = Vector2.one;
+        handle.sizeDelta = Vector2.zero;
+        Image handleImage = handleObject.GetComponent<Image>();
+        handleImage.color = new Color(0.77f, 0.34f, 0.08f, 0.8f);
+        Scrollbar bar = barObject.GetComponent<Scrollbar>();
+        bar.handleRect = handle;
+        bar.targetGraphic = handleImage;
+        bar.direction = Scrollbar.Direction.BottomToTop;
+
+        ScrollRect scroll = scrollObject.GetComponent<ScrollRect>();
+        scroll.viewport = viewport;
+        scroll.content = content;
+        scroll.horizontal = false;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 35f;
+        scroll.verticalScrollbar = bar;
+        scroll.verticalNormalizedPosition = 1f;
+    }
+
+    private static void PlaceRankingElement(Transform element, RectTransform content, Vector2 position)
+    {
+        if (element == null) return;
+        RectTransform rect = (RectTransform)element;
+        rect.SetParent(content, false);
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
+        rect.anchoredPosition = position;
+    }
+#endif
     private void OnEnable()
     {
+        currentID = PlayerPrefs.GetString("playerid");
+        Score = 0;
+        gameEnding = false;
+        ScoreTextMeshPro.text = "0";
         time = 60f;
         TimeTextMeshPro.text = time.ToString();
+        ReplayBtn.onClick.RemoveListener(ReplayBtnFunc);
+        GameExitBtn.onClick.RemoveListener(ExitGameBtnFunc);
         ReplayBtn.onClick.AddListener(ReplayBtnFunc);
         GameExitBtn.onClick.AddListener(ExitGameBtnFunc);
         StopAllCoroutines();
-        StartCoroutine(GetFoodDataAndStartGame());
-    }
-    void Start()
-    {
-        currentID = PlayerPrefs.GetString("playerid");
-        ReplayBtn.onClick.AddListener(ReplayBtnFunc);
-        GameExitBtn.onClick.AddListener(ExitGameBtnFunc);
         StartCoroutine(GetFoodDataAndStartGame());
     }
     private IEnumerator GetFoodDataAndStartGame()
@@ -77,6 +238,15 @@ public class GamePlayFunc : MonoBehaviour
 
     private void StartGame()
     {
+        if (FoodAvgScoreData == null || FoodAvgScoreData.Count < 2)
+        {
+            LeftFood.interactable = false;
+            RightFood.interactable = false;
+            GameOverPanel.SetActive(true);
+            Text_1st.text = "음식 점수 데이터가 부족합니다";
+            Debug.LogWarning("UP & DOWN: 음식 점수 데이터가 부족하거나 데이터베이스에 연결할 수 없습니다.");
+            return;
+        }
         UpDownState = GetRandomOption();
         Debug.Log("UpdownState: " + UpDownState);
         newStage();
@@ -85,6 +255,11 @@ public class GamePlayFunc : MonoBehaviour
 
     private void newStage()
     {
+        if (FoodAvgScoreData == null || FoodAvgScoreData.Count < 2)
+        {
+            StartGame();
+            return;
+        }
         Debug.Log("닉네임: " + currentNickName);
         foreach(var t in textMeshProUGUIs)
         {
@@ -147,6 +322,7 @@ public class GamePlayFunc : MonoBehaviour
         {
             Debug.Log("Game Over Because Low Data");
             StartCoroutine(GameOverFunction());
+            return;
         }
 
         stage = new ItemIndex();
@@ -173,6 +349,9 @@ public class GamePlayFunc : MonoBehaviour
     {
         GameOverPanel.SetActive(false);
         StopAllCoroutines();
+        Score = 0;
+        gameEnding = false;
+        ScoreTextMeshPro.text = "0";
         time = 60f;
         TimeTextMeshPro.text = time.ToString();
         newStage();
@@ -197,14 +376,11 @@ public class GamePlayFunc : MonoBehaviour
     private void FoodImgGet(int foodNumber, string Direction, string foodname)
     {
         Image target = Direction == "Left" ? LeftFoodImg : RightFoodImg;
-        Sprite foodSprite = FoodImageCatalog.Get(foodNumber);
         FoodImageCatalog.Apply(target, foodNumber);
         TextMeshProUGUI nameLabel = target.GetComponentInChildren<TextMeshProUGUI>();
         if (nameLabel != null)
         {
-            Vector2 textPosition = nameLabel.gameObject.transform.localPosition;
-            nameLabel.color = foodSprite != null
-                ? GetFoodTextColor(foodSprite.texture, textPosition) : Color.black;
+            nameLabel.color = new Color(0.35f, 0.15f, 0.07f);
             nameLabel.text = foodname;
         }
     }
@@ -397,26 +573,8 @@ public class GamePlayFunc : MonoBehaviour
         System.Random random = new System.Random();
         int index = random.Next(0, UpDownOption.Count);
         string option = UpDownOption[index];
-        string UPdownImgUrl;
-        byte[] imagedata;
-        if (option.Equals("UP"))
-        {
-            UPdownImgUrl = Application.dataPath + "/Images/icon/" + "UpImg.png";
-            imagedata = System.IO.File.ReadAllBytes(UPdownImgUrl);
-            Texture2D tex = new Texture2D(2, 2);
-            tex.LoadImage(imagedata);
-            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-            UpDownImg.sprite = sprite;
-        }
-        else if(option.Equals("DOWN"))
-        {
-            UPdownImgUrl = Application.dataPath + "/Images/icon/" + "DownImg.png";
-            imagedata = System.IO.File.ReadAllBytes(UPdownImgUrl);
-            Texture2D tex = new Texture2D(2, 2);
-            tex.LoadImage(imagedata);
-            Sprite sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), Vector2.zero);
-            UpDownImg.sprite = sprite;
-        }
+        UpDownImg.sprite = Resources.Load<Sprite>("FoodTasteUpDownUI/" + (option == "UP" ? "UpImg" : "DownImg"));
+        UpDownImg.preserveAspect = true;
         return option;
     }
 
@@ -439,11 +597,11 @@ public class GamePlayFunc : MonoBehaviour
                 }
             }
             string DotTwoValue = currentvalue.ToString("F2");
-            LeftFoodScore.text = DotTwoValue;
-            RightFoodScore.text = DotTwoValue;
+            LeftFoodScore.text = "평균 " + DotTwoValue + "점";
+            RightFoodScore.text = "평균 " + DotTwoValue + "점";
         }
-        LeftFoodScore.text = FoodAvgScoreData[currentItem1Index].Item2.ToString("F2") +" 점";
-        RightFoodScore.text = FoodAvgScoreData[currentItem2Index].Item2.ToString("F2")+ " 점";
+        LeftFoodScore.text = "평균 " + FoodAvgScoreData[currentItem1Index].Item2.ToString("F2") + "점";
+        RightFoodScore.text = "평균 " + FoodAvgScoreData[currentItem2Index].Item2.ToString("F2") + "점";
         
     }
 
@@ -476,11 +634,29 @@ public class GamePlayFunc : MonoBehaviour
 
     private IEnumerator GameOverFunction()
     {
+        if (gameEnding) yield break;
+        gameEnding = true;
+        if (timeCoroutine != null) StopCoroutine(timeCoroutine);
+        LeftFood.interactable = false;
+        RightFood.interactable = false;
         yield return new WaitForSeconds(1.0f);
         GameOverPanel.SetActive(true);
-        SetScoreData();
-        Score = 0;
+        ScrollRect rankingScroll = GameOverPanel.GetComponentInChildren<ScrollRect>();
+        if (rankingScroll != null) rankingScroll.verticalNormalizedPosition = 1f;
+        int bestScore, rank, previousScore;
+        bool hadPreviousScore;
+        bool saved = SetScoreData(Score, out bestScore, out rank, out hadPreviousScore, out previousScore);
         ScoreTextMeshPro.text = Score.ToString();
+        if (resultText != null)
+        {
+            string message = "이번 점수 " + Score + "점";
+            if (saved)
+            {
+                string status = !hadPreviousScore ? "첫 기록 등록!" : Score > previousScore && Score == bestScore ? "최고 기록 갱신!" : "기록 유지";
+                message += "\n최고 기록 " + bestScore + "점 · " + status;
+            }
+            resultText.text = message;
+        }
 
         List<(string, int)> GetScoreData = GetRankData();
         List<(TextMeshProUGUI, TextMeshProUGUI)> Rank_List = new List<(TextMeshProUGUI, TextMeshProUGUI)>();
@@ -561,30 +737,51 @@ public class GamePlayFunc : MonoBehaviour
         {
             conn.Close();
         }
-        if(ScoreData.Count > 0) 
-        { 
-            return ScoreData;
-        }
-        else
-        {
-            return null;
-        }
+        return ScoreData;
     }
 
-    private void SetScoreData()
+    private bool SetScoreData(int finalScore, out int bestScore, out int rank, out bool hadPreviousScore, out int previousScore)
     {
+        bestScore = finalScore;
+        rank = 0;
+        hadPreviousScore = false;
+        previousScore = 0;
+        if (string.IsNullOrWhiteSpace(currentID) || string.IsNullOrWhiteSpace(currentNickName))
+        {
+            Debug.LogWarning("UP & DOWN: 로그인한 사용자를 확인할 수 없어 점수를 저장하지 못했습니다.");
+            return false;
+        }
         MySqlConnection conn = new MySqlConnection(connStr);
         try
         {
             conn.Open();
+            using (MySqlCommand previousCommand = new MySqlCommand("SELECT score FROM game_scores WHERE player_id = @player_id", conn))
+            {
+                previousCommand.Parameters.AddWithValue("@player_id", currentID);
+                object value = previousCommand.ExecuteScalar();
+                hadPreviousScore = value != null && value != DBNull.Value;
+                if (hadPreviousScore) previousScore = Convert.ToInt32(value);
+            }
             MySqlCommand cmd = new MySqlCommand("insert into Game_scores (player_id , score) values (@player_id, @score) on duplicate key update score = if(score < values(score) , values(score), score)",conn);
             cmd.Parameters.AddWithValue("@player_id", currentID);
-            cmd.Parameters.AddWithValue("@score", Score);
+            cmd.Parameters.AddWithValue("@score", finalScore);
             cmd.ExecuteNonQuery();
+            using (MySqlCommand bestCommand = new MySqlCommand("SELECT score FROM game_scores WHERE player_id = @player_id", conn))
+            {
+                bestCommand.Parameters.AddWithValue("@player_id", currentID);
+                bestScore = Convert.ToInt32(bestCommand.ExecuteScalar());
+            }
+            using (MySqlCommand rankCommand = new MySqlCommand("SELECT COUNT(*) FROM game_scores JOIN user ON game_scores.player_id = user.id WHERE game_scores.score > @score", conn))
+            {
+                rankCommand.Parameters.AddWithValue("@score", bestScore);
+                rank = Convert.ToInt32(rankCommand.ExecuteScalar()) + 1;
+            }
+            return true;
         }
         catch(Exception ex) 
         {
-            Debug.Log(ex);
+            Debug.LogWarning("UP & DOWN: 점수를 저장하지 못했습니다: " + ex.Message);
+            return false;
         }
         finally { conn.Close(); }
 

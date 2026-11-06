@@ -25,6 +25,49 @@ public class GameBackGroundFunc : MonoBehaviour
         ExitRankingBtn.onClick.AddListener(ExitRankingFunc);
     }
 
+#if UNITY_EDITOR
+    public void AlignRankingRows()
+    {
+        Transform panel = GameRankingPanel.transform;
+        Transform oldTitle = panel.Find("Image/OverPanelTitle");
+        if (oldTitle != null) oldTitle.gameObject.SetActive(false);
+        Transform existingCaption = panel.Find("RankingCaption");
+        GameObject captionObject = existingCaption != null ? existingCaption.gameObject : new GameObject("RankingCaption", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
+        RectTransform captionRect = (RectTransform)captionObject.transform;
+        captionRect.SetParent(panel, false);
+        captionRect.anchorMin = captionRect.anchorMax = captionRect.pivot = new Vector2(0.5f, 0.5f);
+        captionRect.anchoredPosition = new Vector2(0f, 325f);
+        captionRect.sizeDelta = new Vector2(420f, 45f);
+        TextMeshProUGUI caption = captionObject.GetComponent<TextMeshProUGUI>();
+        caption.font = Ranking_1st.font;
+        caption.fontSharedMaterial = Ranking_1st.fontSharedMaterial;
+        caption.fontSize = 26f;
+        caption.alignment = TextAlignmentOptions.Center;
+        caption.color = new Color(0.35f, 0.15f, 0.07f);
+        caption.raycastTarget = false;
+        caption.text = "최고 기록 기준";
+        string[] ranks = { "1st", "2nd", "3rd", "4th", "5th", "6th", "7th" };
+        TextMeshProUGUI[] names = { Ranking_1st, Ranking_2nd, Ranking_3rd, Ranking_4th, Ranking_5th, Ranking_6th, Ranking_7th };
+        for (int i = 0; i < ranks.Length; i++)
+        {
+            float y = 225f - 88f * i;
+            RectTransform row = panel.Find("RankingRow_" + (i + 1)) as RectTransform;
+            RectTransform badge = panel.Find(ranks[i] + "img") as RectTransform;
+            if (row != null)
+            {
+                row.sizeDelta = new Vector2(650f, 160f);
+                row.anchoredPosition = new Vector2(row.anchoredPosition.x, y);
+            }
+            if (badge != null) badge.anchoredPosition = new Vector2(badge.anchoredPosition.x, y);
+            if (names[i] != null)
+            {
+                RectTransform label = names[i].rectTransform;
+                label.anchoredPosition = new Vector2(label.anchoredPosition.x, y);
+            }
+        }
+    }
+#endif
+
     private void GamestartBtnFunc()
     {
         GamePlayPanel.SetActive(true);
@@ -68,14 +111,7 @@ public class GameBackGroundFunc : MonoBehaviour
         {
             conn.Close();
         }
-        if (ScoreData.Count > 0)
-        {
-            return ScoreData;
-        }
-        else
-        {
-            return null;
-        }
+        return ScoreData;
     }
     
     private void RankingFunction()
@@ -131,7 +167,7 @@ public class GameBackGroundFunc : MonoBehaviour
             foreach (var item in GetScoreData)
             {
                 Rank_List[count].Item1.text = item.Item1;
-                Rank_List[count].Item2.text = item.Item2.ToString() + " ��";
+                Rank_List[count].Item2.text = item.Item2.ToString() + " 점";
                 count++;
             }
         }

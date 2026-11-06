@@ -53,6 +53,8 @@ public class CSVManager : MonoBehaviour
 
         string filePath = getPath();
 
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
         StreamWriter outstream = System.IO.File.CreateText(filePath);
         
         outstream.WriteLine(sb);

@@ -50,3 +50,13 @@ py -3 .\tools\db\install_demo_db.py --mysql "C:\Program Files\MySQL\MySQL Server
 * 기존에 생성된 **서로 다른 스키마**의 테이블이 있다면 자동 변경하지 않고 SQL 오류를 표시한다. 기존 데이터가 있는 DB에 무조건 맞춰 변경하는 마이그레이션은 제공하지 않는다.
 
 스크립트 경로는 `tools/db/schema.sql`, `tools/db/install_demo_db.py`.
+
+### 전체 음식 데모 보강
+
+기존 DB와 `demo01` 계정이 준비된 상태에서 다음 명령을 실행하면 음식별 평가와 댓글, 데모 친구·채팅·식사 기록을 추가한다.
+
+```powershell
+py -3 .\tools\db\seed_full_demo.py
+```
+
+`ftdemo01`~`ftdemo30` 계정을 추가하며 비밀번호는 `demo1234`다. 음식별 평가는 여러 사용자에게 분산하고, 댓글이 없는 음식에만 댓글을 추가한다. `demo01`에는 데모 친구 5명과 대화, 비어 있는 오늘의 식사 기록을 추가한다. 기존 데이터는 삭제하거나 덮어쓰지 않으며 충돌하는 계정 이름이 있으면 실행을 중단한다. `--check-only`는 계정 충돌 여부만 검사한다. 생성된 데이터는 시연을 위한 가상 기록이다.

@@ -225,7 +225,7 @@ public class For_Search_history : MonoBehaviour
                 Image contentproImg = item.GetComponentsInChildren<Image>().LastOrDefault();
                 Button DeleteBtn = item.GetComponentInChildren<Button>();
                 item.transform.SetParent(ReplyScroll,false);
-                item.transform.localPosition = new Vector3(0,-i * 100, 0);
+
                 DeleteBtn.onClick.AddListener(DeleteReply);
                 textmeshes.AddRange(item.GetComponentsInChildren<TextMeshProUGUI>());
                 ReplyPreFabList.Add(item);

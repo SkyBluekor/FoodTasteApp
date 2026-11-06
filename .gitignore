@@ -9,12 +9,14 @@
 /MemoryCaptures/
 /Recordings/
 /FoodImageBackups/
+/[Aa]rtifacts/
+/[Oo]utput/
 /Assets/Unity.VisualScripting.Generated/
 /Assets/Unity.VisualScripting.Generated.meta
 
 # IDE and generated project files
 /.vs/
-/.vscode/
+**/.vscode/
 /.idea/
 *.csproj
 *.sln
@@ -30,13 +32,26 @@
 *.VC.db
 *.unityproj
 *.tmp
+*.temp
+*.log
 UpgradeLog.htm
+
+# Python and local tool caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
 
 # Build and package artifacts
 *.apk
 *.aab
 *.unitypackage
 *.app
+*.exe
+*.msi
+*.dmg
 sysinfo.txt
 
 # Local configuration and credentials
@@ -47,8 +62,27 @@ sysinfo.txt
 *.pfx
 *.pem
 *.key
+*.jks
+*.keystore
+*.mobileprovision
+*.provisionprofile
 **/google-services.json
 **/GoogleService-Info.plist
+
+# Local databases, dumps, and runtime data (schema.sql remains tracked)
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.sql.gz
+*.sql.zip
+*.sql.bak
+*.dump
+*.dmp
+*.bak
+/Assets/Resources/CSV/FoodScoreData.csv
+/Assets/Resources/CSV/FoodScoreData.csv.meta
 
 # OS files
 .DS_Store

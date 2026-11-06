@@ -1,25 +1,106 @@
 # FoodTasteApp
 
-Unity로 만든 음식 취향 앱 프로젝트입니다.
+### 음식 취향을 기록하고, 다음 메뉴를 찾는 Unity 애플리케이션
 
-## 실행 환경
+**FoodTasteApp은 음식 평가와 식사 기록을 바탕으로 취향에 맞는 음식을 찾아보고, 친구와 의견을 나눌 수 있도록 만든 프로젝트입니다.** 음식 검색부터 별점·댓글, 추천, 랜덤 메뉴 선택까지 하나의 앱에서 이어집니다.
 
-- Unity 에디터 버전은 `ProjectSettings/ProjectVersion.txt`를 참고하세요.
-- 데이터베이스를 사용하는 기능은 로컬 MySQL의 `tasteapp` 데이터베이스에 연결합니다.
-- Unity 에디터 또는 실행 파일을 시작하기 전에 환경 변수 `FOODTASTE_DB_PASSWORD`에 MySQL `root` 사용자의 비밀번호를 설정하세요. 비밀번호를 소스 코드나 Git에 저장하지 마세요.
+**기술 스택** — Unity 2022.3.62f3 · C# · Unity UI · TextMeshPro · MySQL · Python(데모 DB 준비)
 
-Windows PowerShell에서 현재 세션에 설정하는 예시:
+## 1. 프로그램 화면
 
-```powershell
-$env:FOODTASTE_DB_PASSWORD = '<MySQL 비밀번호>'
+<p align="center">
+  <img src="Docs/Images/roulette-cards.png" width="680" alt="음식 이름, 음식 이미지와 평균 점수가 표시된 룰렛 음식 카드 화면">
+</p>
+<p align="center"><strong>메뉴 선택 — 음식 카드를 구성하고 랜덤으로 고르기</strong></p>
+
+<p align="center">
+  <img src="Docs/Images/food-detail-earlier.png" width="720" alt="보리밥 사진과 음식 점수, 검색 횟수, 댓글 목록을 보여 주는 음식 상세 화면">
+</p>
+<p align="center"><strong>음식 상세 — 음식 정보와 댓글 확인</strong></p>
+
+위 이미지는 개발 중 사용자가 제공한 실제 앱 화면입니다. 음식 상세 이미지는 **댓글 영역의 여백을 수정하기 전 화면**이며 현재 UI와 일부 차이가 있습니다. 룰렛 카드의 접시 이미지는 음식 사진을 찾지 못했을 때 표시되는 대체 이미지입니다. 로그인·추천·채팅·식사 기록 등 다른 화면은 아직 캡처하지 않았습니다.
+
+## 2. 기획 배경
+
+오늘 무엇을 먹을지 고르기 어렵거나, 먹어본 음식에 대한 생각을 나중에 다시 확인하기 어려운 상황에서 출발했습니다. 음식에 점수를 남기고 비슷한 취향의 평가를 참고하며, 선택이 어려울 때는 후보를 카드로 모아 고를 수 있도록 구성했습니다.
+
+```mermaid
+flowchart LR
+    A["음식 검색"] --> B["별점 · 댓글"]
+    B --> C["취향이 비슷한 사용자 비교"]
+    C --> D["음식 추천"]
+    A --> E["식사 기록"]
+    A --> F["후보 카드 · 랜덤 선택"]
+    B --> G["친구 · 채팅"]
 ```
 
-환경 변수를 설정한 세션에서 Unity를 시작해야 에디터가 해당 값을 사용할 수 있습니다. 기존에 실행 중인 Unity 에디터는 설정 후 다시 시작하세요.
+## 3. 주요 기능
 
-## 로컬 DB 원클릭 구성 (데모)
+| 기능 | 사용자 경험 | 관련 코드 |
+|---|---|---|
+| **음식 검색과 상세** | 음식 이름을 검색하고 평균 점수·검색 횟수·댓글을 확인 | [검색](Assets/Scripts/MainFuncScripts/SearchingFunc.cs) · [상세·댓글](Assets/Scripts/MainFuncScripts/For_Search_history.cs) |
+| **음식 평가** | 음식에 1~5점의 별점을 남기고 내 평가 목록을 확인 | [음식 평가](Assets/Scripts/MainFuncScripts/FoodEvaManager.cs) · [내 정보](Assets/Scripts/MainFuncScripts/MyInfoPanelManager.cs) |
+| **취향 기반 추천** | 공통 평가가 있는 사용자의 유사도를 비교해 추천 음식 표시 | [추천 로직](Assets/Scripts/MainFuncScripts/GetSimFoodScore.cs) |
+| **먹은 음식 기록** | 아침·점심·저녁 식사와 이전에 먹은 음식 확인 | [식사 기록](Assets/Scripts/MainFuncScripts/EatCheckPanelFunc.cs) |
+| **친구와 채팅** | 친구 요청·목록을 확인하고 친구와 메시지 주고받기 | [친구·채팅](Assets/Scripts/MainFuncScripts/FriendshipFunc.cs) |
+| **음식 카드 선택** | 후보 음식을 카드로 만들고 섞어 메뉴 선택 | [후보 구성](Assets/Scripts/RoultteFunc/CardPickSearch.cs) · [카드 섞기](Assets/Scripts/RoultteFunc/CardMoveFunc.cs) |
+| **업다운 게임** | 음식들의 평균 점수를 비교하고 최고 기록·순위 확인 | [게임 진행](Assets/Scripts/Up&DownSceneScript/GamePlayFunc.cs) · [순위](Assets/Scripts/Up&DownSceneScript/GameBackGroundFunc.cs) |
 
-MySQL Server 8.x와 Python 3를 설치하고 MySQL 서버를 실행한 후, 프로젝트 루트의 **`Install-FoodTasteDB.cmd`를 더블클릭**하세요. MySQL root 비밀번호를 입력하면 `tasteapp` DB에 필요한 테이블 10개, 프로젝트 XML 음식 목록, 데모 회원 20명과 음식 평점 1,040개를 준비합니다. 기존 테이블/평점을 삭제하지 않으며 동일한 데모 데이터는 중복 생성하지 않도록 작성했습니다.
+## 4. 구현 방식
 
-데모 로그인: `demo01` / `demo1234` (`demo01`~`demo20`). Unity를 실행할 때는 앞서 안내한 `FOODTASTE_DB_PASSWORD`를 동일하게 설정해야 합니다. 앱은 로컬 전용 개발 시연용이며 계정 보안은 운영 서비스 수준이 아닙니다.
+### 취향에 맞는 음식 찾기
 
-테이블의 전체 목록과 설치 문제 해결은 [DATABASE_SETUP.md](DATABASE_SETUP.md)에서 확인하세요.
+음식별 사용자 평점을 MySQL에서 가져와 사용자별 평가 목록으로 구성합니다. 두 사용자가 공통으로 평가한 음식에 대해 각자의 평균 평점을 뺀 값을 사용해 코사인 유사도를 계산하고, 비슷한 사용자의 평점을 이용해 추천 후보를 정렬합니다. 추천 화면 진입에는 **본인 평가 10개 이상**과 **공통 평가가 2개 이상인 다른 사용자 2명 이상**이 필요합니다.
+
+이 기능은 현재 코드에 구현된 사용자 기반 추천 방식입니다. 추천 정확도를 별도 실험으로 검증한 결과는 아직 없습니다. [추천 구현 보기](Assets/Scripts/MainFuncScripts/GetSimFoodScore.cs)
+
+### 화면과 데이터 연결
+
+```mermaid
+flowchart LR
+    U["사용자"] --> UI["Unity UI · TextMeshPro"]
+    UI --> CS["C# 화면 · 기능 스크립트"]
+    CS --> DB[("MySQL · tasteapp")]
+    CS --> IMG["음식 이미지 · 대체 이미지"]
+    XML["음식 영양정보 XML"] --> SETUP["DB 준비 스크립트"]
+    SETUP --> DB
+```
+
+- **Unity / C#:** 검색, 평가, 친구, 식사 기록과 미니게임의 UI 및 이벤트를 처리합니다.
+- **MySQL:** 음식, 사용자 평가·댓글, 식사·검색 이력, 친구 관계와 메시지를 저장합니다.
+- **음식 이미지:** 음식 번호와 이름을 확인해 사진을 연결하고, 확인할 수 없는 이미지는 기본 이미지로 대체합니다. [매핑 설명](FOOD_IMAGE_MAPPING.md)
+- **데모 데이터:** 별도의 스크립트로 가상 사용자·평가·댓글·친구·채팅을 로컬 DB에 채울 수 있습니다. 실제 사용자 데이터가 아닙니다.
+
+## 5. 실행 방법
+
+**필요 환경:** Windows, Unity **2022.3.62f3**, 로컬 MySQL Server와 `mysql` 클라이언트, Python 3. DB에 접근하는 기능은 로컬 `tasteapp` DB와 MySQL `root` 계정을 사용합니다.
+
+1. 저장소를 내려받고 MySQL 서버를 실행합니다.
+2. 프로젝트 루트의 `Install-FoodTasteDB.cmd`를 실행해 스키마, 음식 데이터, 기본 데모 사용자를 준비합니다. 비밀번호는 환경 변수 `FOODTASTE_DB_PASSWORD`로 전달하거나 설치 과정에서 입력합니다.
+3. 전체 음식의 평가·댓글과 친구·채팅 데모를 추가하려면 다음 명령을 실행합니다.
+
+   ```powershell
+   py -3 .\tools\db\seed_full_demo.py
+   ```
+
+4. Unity Hub를 시작하기 전에 같은 MySQL 비밀번호를 환경 변수 `FOODTASTE_DB_PASSWORD`에 설정합니다. Unity Hub나 에디터가 이미 열려 있었다면 환경 변수를 읽도록 다시 시작합니다.
+5. Unity에서 [IntroScene](Assets/Scenes/IntroScene.unity)을 열고 Play를 누릅니다. 데모 계정은 **`demo01` / `demo1234`**입니다.
+
+테이블 구성, 환경 변수 설정과 추가 데모 계정은 [DB 설정 문서](DATABASE_SETUP.md)를 참고하세요. 이 구성은 로컬 개발·시연용이며, 운영 서비스에 바로 배포하기 위한 보안 구조는 아닙니다.
+
+## 6. 프로젝트 구성
+
+| 경로 | 내용 |
+|---|---|
+| [Assets/Scenes](Assets/Scenes) | 로그인, 메인 기능, 룰렛, 업다운 게임 씬 |
+| [Assets/Scripts](Assets/Scripts) | UI 이벤트, 검색·추천·DB 연동, 게임 로직 |
+| [Assets/Resources](Assets/Resources) | UI 에셋, 프리팹, 음식 데이터와 이미지 매핑 |
+| [tools/db](tools/db) | MySQL 스키마 및 가상 데모 데이터 생성 도구 |
+| [DATABASE_SETUP.md](DATABASE_SETUP.md) | DB 준비 및 데모 실행 안내 |
+
+## 7. 현재 범위와 확인이 필요한 부분
+
+- 일부 음식 사진은 제공되지 않거나 매핑 검토가 필요해 기본 이미지가 표시됩니다. [음식 이미지 설명](FOOD_IMAGE_MAPPING.md)
+- 이 README의 화면 이미지는 개발 중 제공된 캡처이며, 모든 화면과 최신 변경 사항에 대한 시각 검증을 의미하지 않습니다.
+- 로컬 DB에 직접 연결하는 시연용 구조입니다. 계정 인증, 사용자 데이터 보호, 배포용 서버 분리는 별도 개선이 필요합니다.
+- 실제 사용자를 대상으로 한 추천 성능·사용성 검증이나 운영 서비스 도입 결과는 포함하지 않았습니다.

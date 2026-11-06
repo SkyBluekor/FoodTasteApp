@@ -26,7 +26,7 @@ public class CardPickSearch : MonoBehaviour
     TMP_InputField SearchingInput;
     private Dictionary<string, string> FoodDataDic = new Dictionary<string, string>();
     private Dictionary<string, float> FoodScoreDic = new Dictionary<string, float>();
-    List<string> FoodNum, FoodName, KmpValue;
+    List<string> FoodNum = new List<string>(), FoodName = new List<string>(), KmpValue;
     [SerializeField]
     private GameObject ContentPrefab;
     [SerializeField]
@@ -51,7 +51,6 @@ public class CardPickSearch : MonoBehaviour
         CardSpawnPrefabs = new GameObject[maxPrefabCount];
         TmpDropdown.onValueChanged.AddListener(OnValueChanged);
 
-        GetFoodName();
         SearchingInput.onValueChanged.AddListener(KMPReturn);
         foreach(GameObject card in CardSpawnPrefabs)
         {
@@ -64,6 +63,8 @@ public class CardPickSearch : MonoBehaviour
         RefreshBtn.onClick.AddListener(RefreshBtnFunc);
         RandomPickBtn.onClick.AddListener(RandomPickFunc);
         ExitBtn.onClick.AddListener(ExitBtnFunc);
+        RefreshBtnFunc();
+        GetFoodName();
 
     }
 
@@ -127,43 +128,7 @@ public class CardPickSearch : MonoBehaviour
     }
     private void OnValueChanged(int index)
     {
-        for(int i = 0; i < spawnedPrefabs.Length; i++)
-        {
-            if (spawnedPrefabs[i] != null)
-                Destroy(spawnedPrefabs[i]);
-            if (CardSpawnPrefabs[i] != null)
-                Destroy(CardSpawnPrefabs[i]);
-        }
-
-        int count = index+1;
-
-        if (count == currentPrefabCount)
-            return;
-
-        for(int i = count; i < currentPrefabCount; i++ )
-        {   
-            
-            if (spawnedPrefabs[i] != null)
-                Destroy(spawnedPrefabs[i]);
-            if (CardSpawnPrefabs[i] != null)
-                Destroy(CardSpawnPrefabs[i]);
-           
-        }
-
-        for(int i = 0; i < count ; i++ ) 
-        {
-            spawnedPrefabs[i] = Instantiate(FoodTrayPreFab, spawnVec3[i], Quaternion.Euler(0, 0, 0), OptionPanel.transform);
-            spawnedPrefabs[i].transform.localPosition = spawnVec3[i];
-
-            GameObject prefab = CardPreFab[Random.Range(0,CardPreFab.Length)];
-            CardSpawnPrefabs[i] = Instantiate(prefab, CardPanel.transform);
-            CardSpawnPrefabs[i].transform.localPosition = CardPosition(i, count);
-        }
-        cardMoveFunc.StopAllCoroutines();
-        cardMoveFunc.CancelInvoke("DestroyCardObj");
-        cardMoveFunc.cardList = new List<Transform>();
-
-        currentPrefabCount = count;
+        RefreshBtnFunc();
     }
     private void KMPReturn(string Searching)
     {
@@ -172,7 +137,6 @@ public class CardPickSearch : MonoBehaviour
 
         if (childList.Length > 0)
         {
-            RelatedSearch.SetActive(true);
             for (int z = 1; z < childList.Length; z++)
             {
                 if (childList[z] != transform)
@@ -222,7 +186,7 @@ public class CardPickSearch : MonoBehaviour
 
         if (KmpValue.Count == 0)
         {
-            RelatedSearch.SetActive(false);
+            ScrollView.SetActive(false);
         }
 
 
@@ -295,7 +259,6 @@ public class CardPickSearch : MonoBehaviour
     {
         string connStr = "Server=localhost;database=tasteapp;userid=root;password=" + FoodTasteDbPassword.Resolve() + ";";
         MySqlConnection conn = new MySqlConnection(connStr);
-        conn.Open();
         MySqlCommand cmd;
         FoodName = new List<string>();
         FoodNum = new List<string>();
@@ -304,6 +267,7 @@ public class CardPickSearch : MonoBehaviour
         int i = 0;
         try
         {
+            conn.Open();
             cmd = new MySqlCommand(SelectFoodName, conn);
             MySqlDataReader reader = cmd.ExecuteReader();
 
@@ -328,9 +292,9 @@ public class CardPickSearch : MonoBehaviour
             }
             reader.Close();
         }
-        catch (MySql.Data.MySqlClient.MySqlException e)
+        catch (System.Exception e)
         {
-            Debug.Log(e.Message);
+            Debug.LogWarning("음식 목록을 불러오지 못했습니다. 데이터베이스 연결을 확인하세요: " + e.Message);
         }
         conn.Close();
     }
@@ -398,7 +362,6 @@ public class CardPickSearch : MonoBehaviour
                 }
                 
             }
-            RelatedSearch.SetActive(false);
             ScrollView.SetActive(false);
             SearchingInput.onValueChanged.AddListener(KMPReturn);
         });
@@ -442,7 +405,7 @@ public class CardPickSearch : MonoBehaviour
         }
         Debug.Log("spawnprecount 갯수 "+spawnedPreCount);
 
-        if (currentPrefabCount > 0 &&  spawnedPreCount > 1)
+        if (currentPrefabCount > 0 && spawnedPreCount > 0)
         {
             List<KeyValuePair<string, string>> GetRandItemsList = GetRandomItems(FoodDataDic, ItemCount);
 
@@ -478,7 +441,7 @@ public class CardPickSearch : MonoBehaviour
         
         List<KeyValuePair<string,string>> randomItems = new List<KeyValuePair<string,string>>();
 
-        for(int i = 0; i < itemcount; i++) 
+        for(int i = 0; i < itemcount && keys.Count > 0; i++)
         { 
             int randomindex = UnityEngine.Random.Range(0,keys.Count);
 
