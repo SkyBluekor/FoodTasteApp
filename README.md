@@ -9,31 +9,18 @@
 ## 1. 프로그램 화면
 
 <p align="center">
-  <img src="Docs/Images/main-recommendations.png" width="850" alt="음식 추천, 비슷한 사용자와 인기 음식을 보여주는 메인 화면">
+  <img src="Docs/Images/main-recommendations.png" width="760" alt="음식 추천, 비슷한 사용자와 인기 음식을 보여주는 메인 화면">
 </p>
 <p align="center"><strong>메인 화면 — 취향 기반 추천과 인기 음식</strong></p>
 
-| 로그인 | 회원가입 |
-|:---:|:---:|
-| <img src="Docs/Images/login.png" width="420" alt="로그인 화면"> | <img src="Docs/Images/signup.png" width="420" alt="회원가입 화면"> |
+| | | |
+|:---:|:---:|:---:|
+| <img src="Docs/Images/food-rating.png" width="260" alt="음식 별점 평가 화면"> | <img src="Docs/Images/food-detail.png" width="260" alt="음식 상세 정보와 댓글 화면"> | <img src="Docs/Images/meal-history.png" width="260" alt="오늘의 식사와 자주 먹는 음식 화면"> |
+| **별점으로 취향 기록** | **평균 점수와 의견 확인** | **시간대별 식사 확인** |
+| <img src="Docs/Images/random-pick.png" width="260" alt="후보 음식 카드와 랜덤 메뉴 선택 화면"> | <img src="Docs/Images/updown-game.png" width="260" alt="음식 점수 비교 업다운 게임 화면"> | <img src="Docs/Images/friend-chat.png" width="185" alt="친구 채팅 영역"> |
+| **후보 중 랜덤 메뉴 선택** | **평균 점수 비교 게임** | **친구와 메시지 교환** |
 
-| 음식 상세와 댓글 | 음식 평가 |
-|:---:|:---:|
-| <img src="Docs/Images/food-detail.png" width="420" alt="음식 상세 정보와 댓글"> | <img src="Docs/Images/food-rating.png" width="420" alt="음식 별점 평가"> |
-
-| 랜덤 메뉴 뽑기 | 먹은 음식 기록 |
-|:---:|:---:|
-| <img src="Docs/Images/random-pick.png" width="420" alt="음식 후보 카드와 랜덤 메뉴 뽑기"> | <img src="Docs/Images/meal-history.png" width="420" alt="오늘의 식사와 자주 먹는 음식"> |
-
-| 업다운 게임 | 내 정보와 평가 목록 |
-|:---:|:---:|
-| <img src="Docs/Images/updown-game.png" width="420" alt="음식 점수 비교 업다운 게임"> | <img src="Docs/Images/my-profile.png" width="420" alt="내 정보와 음식 평가 목록"> |
-
-| 음식 검색 | 친구 채팅 |
-|:---:|:---:|
-| <img src="Docs/Images/food-search.png" width="280" alt="음식 검색 결과"> | <img src="Docs/Images/friend-chat.png" width="280" alt="친구와의 채팅"> |
-
-위 이미지는 사용자가 제공한 앱 실행 화면입니다. 데모 계정과 가상 데이터를 사용했으며, 접시 이미지는 음식 사진을 찾지 못했을 때 표시되는 대체 이미지입니다. 음식 검색과 채팅은 해당 영역을 확대한 캡처입니다.
+화면은 데모 계정으로 실행한 캡처입니다. 채팅은 해당 영역을 확대한 이미지이며, 접시는 사진이 없는 음식의 대체 이미지입니다.
 
 ## 2. 기획 배경
 
