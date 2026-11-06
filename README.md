@@ -9,16 +9,31 @@
 ## 1. 프로그램 화면
 
 <p align="center">
-  <img src="Docs/Images/roulette-cards.png" width="680" alt="음식 이름, 음식 이미지와 평균 점수가 표시된 룰렛 음식 카드 화면">
+  <img src="Docs/Images/main-recommendations.png" width="850" alt="음식 추천, 비슷한 사용자와 인기 음식을 보여주는 메인 화면">
 </p>
-<p align="center"><strong>메뉴 선택 — 음식 카드를 구성하고 랜덤으로 고르기</strong></p>
+<p align="center"><strong>메인 화면 — 취향 기반 추천과 인기 음식</strong></p>
 
-<p align="center">
-  <img src="Docs/Images/food-detail-earlier.png" width="720" alt="보리밥 사진과 음식 점수, 검색 횟수, 댓글 목록을 보여 주는 음식 상세 화면">
-</p>
-<p align="center"><strong>음식 상세 — 음식 정보와 댓글 확인</strong></p>
+| 로그인 | 회원가입 |
+|:---:|:---:|
+| <img src="Docs/Images/login.png" width="420" alt="로그인 화면"> | <img src="Docs/Images/signup.png" width="420" alt="회원가입 화면"> |
 
-위 이미지는 개발 중 사용자가 제공한 실제 앱 화면입니다. 음식 상세 이미지는 **댓글 영역의 여백을 수정하기 전 화면**이며 현재 UI와 일부 차이가 있습니다. 룰렛 카드의 접시 이미지는 음식 사진을 찾지 못했을 때 표시되는 대체 이미지입니다. 로그인·추천·채팅·식사 기록 등 다른 화면은 아직 캡처하지 않았습니다.
+| 음식 상세와 댓글 | 음식 평가 |
+|:---:|:---:|
+| <img src="Docs/Images/food-detail.png" width="420" alt="음식 상세 정보와 댓글"> | <img src="Docs/Images/food-rating.png" width="420" alt="음식 별점 평가"> |
+
+| 랜덤 메뉴 뽑기 | 먹은 음식 기록 |
+|:---:|:---:|
+| <img src="Docs/Images/random-pick.png" width="420" alt="음식 후보 카드와 랜덤 메뉴 뽑기"> | <img src="Docs/Images/meal-history.png" width="420" alt="오늘의 식사와 자주 먹는 음식"> |
+
+| 업다운 게임 | 내 정보와 평가 목록 |
+|:---:|:---:|
+| <img src="Docs/Images/updown-game.png" width="420" alt="음식 점수 비교 업다운 게임"> | <img src="Docs/Images/my-profile.png" width="420" alt="내 정보와 음식 평가 목록"> |
+
+| 음식 검색 | 친구 채팅 |
+|:---:|:---:|
+| <img src="Docs/Images/food-search.png" width="280" alt="음식 검색 결과"> | <img src="Docs/Images/friend-chat.png" width="280" alt="친구와의 채팅"> |
+
+위 이미지는 사용자가 제공한 앱 실행 화면입니다. 데모 계정과 가상 데이터를 사용했으며, 접시 이미지는 음식 사진을 찾지 못했을 때 표시되는 대체 이미지입니다. 음식 검색과 채팅은 해당 영역을 확대한 캡처입니다.
 
 ## 2. 기획 배경
 
@@ -101,6 +116,6 @@ flowchart LR
 ## 7. 현재 범위와 확인이 필요한 부분
 
 - 일부 음식 사진은 제공되지 않거나 매핑 검토가 필요해 기본 이미지가 표시됩니다. [음식 이미지 설명](FOOD_IMAGE_MAPPING.md)
-- 이 README의 화면 이미지는 개발 중 제공된 캡처이며, 모든 화면과 최신 변경 사항에 대한 시각 검증을 의미하지 않습니다.
+- 화면 이미지는 데모 실행 캡처이며 모든 해상도와 기능에 대한 검증을 의미하지 않습니다.
 - 로컬 DB에 직접 연결하는 시연용 구조입니다. 계정 인증, 사용자 데이터 보호, 배포용 서버 분리는 별도 개선이 필요합니다.
 - 실제 사용자를 대상으로 한 추천 성능·사용성 검증이나 운영 서비스 도입 결과는 포함하지 않았습니다.
